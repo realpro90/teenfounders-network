@@ -1,0 +1,6 @@
+name: TeenFoundersLobby
+version: 2.0
+main: com.teenfounders.lobby.TeenFoundersLobby
+api-version: '1.21'
+author: TeenFounders
+description: TeenFounders Network Lobby Manager & World Builder

@@ -108,9 +108,7 @@ fi
 # ─── Step 6: Provision Lobby World (lobby server only) ───────────────────────
 
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
-    if [[ ! -d "${DATA_DIR}/world/datapacks/tf_lobby" ]]; then
-        export TF_FORCE_REINSTALL=1
-    fi
+    export TF_FORCE_REINSTALL=1
 
     if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
         echo ""

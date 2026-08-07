@@ -645,31 +645,29 @@ _install_lobby() {
     done
     _ok "World directory structure created"
 
-    # ── Step 4: Extract or generate world ────────────────────────────────
-    if [[ "${download_ok}" == true ]]; then
-        _section "Extracting Lobby World"
+    # ── Step 4: Extract pre-packaged local or downloaded world ───────────
+    _section "Installing Production Lobby World Package"
 
+    local local_archive="/server/lobby/teenfounders-lobby-world.tar.gz"
+    local local_world="/server/lobby/world"
+
+    if [[ -f "${local_archive}" ]]; then
+        _info "Found pre-bundled production lobby archive: ${local_archive}"
+        tar -xzf "${local_archive}" -C "${DATA_DIR}"
+        INSTALL_METHOD="bundled_archive"
+        _ok "Extracted bundled production lobby world package"
+    elif [[ -d "${local_world}" ]]; then
+        _info "Found pre-bundled production lobby world directory: ${local_world}"
+        cp -rf "${local_world}/"* "${WORLD_DIR}/"
+        INSTALL_METHOD="bundled_directory"
+        _ok "Copied bundled production lobby world package"
+    elif [[ "${download_ok}" == true ]]; then
+        _section "Extracting Downloaded Lobby World"
         if _extract_archive "${archive_path}" "${WORLD_DIR}"; then
             INSTALL_METHOD="archive"
-            _ok "Lobby world installed from archive"
-        else
-            _warn "Archive extraction failed — falling back to flat world generation"
-            rm -rf "${WORLD_DIR}"
-            mkdir -p "${WORLD_DIR}"
-            for dir in "${REQUIRED_WORLD_DIRS[@]}" "${OPTIONAL_WORLD_DIRS[@]}"; do
-                mkdir -p "${WORLD_DIR}/${dir}"
-            done
-            INSTALL_METHOD="flat_generated"
+            _ok "Lobby world installed from downloaded archive"
         fi
-
-        # Clean up archive
         rm -f "${archive_path}"
-    else
-        _section "Generating Flat Lobby World"
-        _info "No pre-built archive available — server will generate a flat world"
-        _info "Generator: Bedrock → Blackstone × 5 → Smooth Quartz surface"
-        INSTALL_METHOD="flat_generated"
-        _ok "Flat world generator configured"
     fi
 
     # ── Step 5: Configure server.properties ──────────────────────────────

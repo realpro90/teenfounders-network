@@ -1,6 +1,7 @@
 # ==============================================================================
 # TeenFounders Network - Premium Master Server Selector GUI Navigator
 # Inspired by Hypixel, styled with TeenFounders Orange/White/Black Palette
+# Auto-opens directly on screen when players join the lobby!
 # ==============================================================================
 
 menu_title: '§6§lTF NETWORK §8| Master Server Navigator'
@@ -9,6 +10,7 @@ open_command:
   - server
   - selector
   - navigate
+open_on_join: true
 size: 36
 
 items:

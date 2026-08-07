@@ -204,8 +204,9 @@ fi
 # ─── Step 11: Launch Server ──────────────────────────────────────────────────
 
 JVM_FLAGS=(
-    # Railway private IPv4 mesh networking
-    "-Djava.net.preferIPv4Stack=true"
+    # Dual-stack Railway mesh networking & instant DNS resolution
+    "-Dnetworkaddress.cache.ttl=0"
+    "-Dnetworkaddress.cache.negative.ttl=0"
     # Memory
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

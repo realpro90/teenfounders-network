@@ -32,5 +32,5 @@ COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 
-# Run BungeeCord with 30s connection timeout for dual-stack Railway mesh networking
-ENTRYPOINT ["java", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]
+# Run BungeeCord with zero DNS cache TTL for instant Railway container IP resolution
+ENTRYPOINT ["java", "-Dnetworkaddress.cache.ttl=0", "-Dnetworkaddress.cache.negative.ttl=0", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]

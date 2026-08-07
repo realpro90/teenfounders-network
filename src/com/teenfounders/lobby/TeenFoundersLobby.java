@@ -16,7 +16,6 @@ import org.bukkit.entity.Fox;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
-import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
@@ -75,11 +74,11 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
                 spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
             }
 
-            purgeMobs(world);
-            spawnLobbyNPCs(world);
+            // Spawn NPCs after chunks load
+            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 40L);
         }
 
-        getLogger().info("TeenFoundersLobby v5.0 enabled! Singapore Region active, Random Companion Pets, Storyline Quests, PvP Arena Pit online.");
+        getLogger().info("TeenFoundersLobby v5.1 enabled! Citizens NPC Protection & Chunk Load Delay active.");
     }
 
     private void configureWorld(World world) {
@@ -98,8 +97,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     private void purgeMobs(World world) {
         for (Entity entity : world.getEntities()) {
-            if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
+            if (entity instanceof Slime) {
                 entity.remove();
+            } else if (entity instanceof Mob) {
+                // Do NOT purge Citizens NPCs or registered Lobby NPCs!
+                if (!entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING)) {
+                    entity.remove();
+                }
             }
         }
     }
@@ -109,52 +113,55 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sy = spawnLocation.getY();
         double sz = spawnLocation.getZ();
 
-        for (Entity entity : world.getEntities()) {
-            if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
-                entity.remove();
-            }
-        }
+        // 1. Creative Plots Master (X + 3)
+        createNPC(world, new Location(world, sx + 3.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
 
-        // 1. Creative Plots Master (X + 5)
-        createNPC(world, new Location(world, sx + 5.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
+        // 2. Survival Event Champion (X - 3)
+        createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
 
-        // 2. Survival Event Champion (X - 5)
-        createNPC(world, new Location(world, sx - 5.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
+        // 3. Build Offs Judge (Z + 3)
+        createNPC(world, new Location(world, sx, sy, sz + 3.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
 
-        // 3. Build Offs Judge (Z + 5)
-        createNPC(world, new Location(world, sx, sy, sz + 5.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
+        // 4. PvP Gladiator (Z - 3)
+        createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
 
-        // 4. PvP Gladiator (Z - 5)
-        createNPC(world, new Location(world, sx, sy, sz - 5.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
-
-        getLogger().info("4 Interactive Server Guide NPCs spawned successfully!");
+        getLogger().info("4 Interactive Guide NPCs verified right at spawn!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
-        Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
-        npc.setCustomName(name);
-        npc.setCustomNameVisible(true);
-        npc.setProfession(Villager.Profession.LIBRARIAN);
-        npc.setVillagerType(Villager.Type.PLAINS);
-        npc.setAI(false);
-        npc.setInvulnerable(true);
-        npc.setSilent(true);
-        npc.setCollidable(false);
-        npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+        // Ensure chunk is loaded before spawning
+        world.getChunkAtAsync(loc).thenAccept(chunk -> {
+            // Check if NPC already exists
+            for (Entity e : loc.getNearbyEntities(1.5, 2.0, 1.5)) {
+                if (e.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+                    return;
+                }
+            }
 
-        Location holoLoc = loc.clone().add(0, 2.2, 0);
-        ArmorStand holo = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
-        holo.setCustomName(subtitle);
-        holo.setCustomNameVisible(true);
-        holo.setGravity(false);
-        holo.setCanPickupItems(false);
-        holo.setVisible(false);
-        holo.setMarker(true);
-        holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
+            Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
+            npc.setCustomName(name);
+            npc.setCustomNameVisible(true);
+            npc.setProfession(Villager.Profession.LIBRARIAN);
+            npc.setVillagerType(Villager.Type.PLAINS);
+            npc.setAI(false);
+            npc.setInvulnerable(true);
+            npc.setSilent(true);
+            npc.setCollidable(false);
+            npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+
+            Location holoLoc = loc.clone().add(0, 2.2, 0);
+            ArmorStand holo = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
+            holo.setCustomName(subtitle);
+            holo.setCustomNameVisible(true);
+            holo.setGravity(false);
+            holo.setCanPickupItems(false);
+            holo.setVisible(false);
+            holo.setMarker(true);
+            holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
+        });
     }
 
     private void spawnRandomPet(Player player) {
-        // Remove existing pet if any
         if (playerPets.containsKey(player.getUniqueId())) {
             Entity oldPet = playerPets.get(player.getUniqueId());
             if (oldPet != null && oldPet.isValid()) oldPet.remove();
@@ -254,7 +261,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
+        if (entity instanceof Slime || (entity instanceof Mob && !entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
             event.setCancelled(true);
         }
     }
@@ -309,7 +316,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
-        // Allow damage inside PvP Arena Pit (Z < -15 near PvP NPC)
         Location loc = event.getEntity().getLocation();
         if (loc.getZ() < -15) {
             event.setCancelled(false);
@@ -320,7 +326,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPvP(EntityDamageByEntityEvent event) {
-        // Allow PvP combat inside PvP Arena Pit (Z < -15 near PvP NPC)
         Location loc = event.getEntity().getLocation();
         if (loc.getZ() < -15) {
             event.setCancelled(false);

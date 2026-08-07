@@ -5,18 +5,17 @@ ENV PAPER_VERSION="1.21.11" \
     PORT="25565" \
     SERVER_NAME="lobby"
 
-RUN apk add --no-cache curl jq bash netcat-openbsd ca-certificates tzdata
+RUN apk add --no-cache curl jq bash netcat-openbsd ca-certificates tzdata tar gzip
 
 WORKDIR /server
 
 COPY common/entrypoint.sh /server/entrypoint.sh
 COPY common/download-plugins.sh /server/scripts/download-plugins.sh
 COPY common/healthcheck.sh /server/scripts/healthcheck.sh
-COPY lobby/setup_lobby_world.sh /server/lobby/setup_lobby_world.sh
-COPY lobbyworld/ /server/lobbyworld/
+COPY lobby/ /server/lobby/
 COPY proxy/secret.txt /server/forwarding.secret
 
-RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh /server/lobby/*.sh
+RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh /server/lobby/*.sh 2>/dev/null || true
 
 EXPOSE 25565/tcp
 

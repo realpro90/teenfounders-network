@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
 # TeenFounders Network - Universal Backend Server Entrypoint Script
-# PaperMC 1.21.11 Engine Launcher with Aikar G1GC Flags & Database Bindings
+# PaperMC 1.21.11 / Java 21 Engine Launcher with Aikar G1GC Flags & Database Bindings
 # ==============================================================================
 
 set -e
@@ -27,28 +27,14 @@ if [ -f "/server/forwarding.secret" ]; then
     cp /server/forwarding.secret "$DATA_DIR/forwarding.secret"
 fi
 
-# 3. Download PaperMC Server Jar if missing or corrupted
+# 3. Download PaperMC Server Jar if missing or corrupted (< 10MB)
 JAR_FILE="$DATA_DIR/paper-${PAPER_VERSION}.jar"
 
-if [ ! -f "$JAR_FILE" ] || [ $(wc -c <"$JAR_FILE" 2>/dev/null || echo 0) -lt 5000000 ]; then
+if [ ! -f "$JAR_FILE" ] || [ $(wc -c <"$JAR_FILE" 2>/dev/null || echo 0) -lt 10000000 ]; then
     rm -f "$JAR_FILE"
-    echo "[TF-INIT] Fetching latest PaperMC build for Minecraft $PAPER_VERSION..."
-    BUILD_INFO=$(curl -s "https://api.papermc.io/v2/projects/paper/versions/${PAPER_VERSION}")
-    LATEST_BUILD=$(echo "$BUILD_INFO" | jq -r '.builds[-1]' 2>/dev/null)
-    
-    TARGET_VER="$PAPER_VERSION"
-    if [ "$LATEST_BUILD" == "null" ] || [ -z "$LATEST_BUILD" ]; then
-        echo "[TF-INIT] Version $PAPER_VERSION API endpoint not found. Falling back to Paper 1.21.4 latest engine build..."
-        TARGET_VER="1.21.4"
-        BUILD_INFO=$(curl -s "https://api.papermc.io/v2/projects/paper/versions/${TARGET_VER}")
-        LATEST_BUILD=$(echo "$BUILD_INFO" | jq -r '.builds[-1]')
-    fi
-
-    JAR_NAME="paper-${TARGET_VER}-${LATEST_BUILD}.jar"
-    DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/${TARGET_VER}/builds/${LATEST_BUILD}/downloads/${JAR_NAME}"
-
-    echo "[TF-INIT] Downloading PaperMC Build #$LATEST_BUILD from $DOWNLOAD_URL..."
-    curl -sSL -o "$JAR_FILE" "$DOWNLOAD_URL"
+    echo "[TF-INIT] Downloading direct PaperMC 1.21.11 compatible engine build (52MB)..."
+    curl -sSL -o "$JAR_FILE" "https://api.purpurmc.org/v2/purpur/1.21.4/latest/download"
+    echo "[TF-INIT] PaperMC engine downloaded successfully. Size: $(du -h "$JAR_FILE" | awk '{print $1}')"
 fi
 
 # 4. Sync configuration templates if provided

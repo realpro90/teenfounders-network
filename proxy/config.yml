@@ -5,7 +5,7 @@
 
 listeners:
 - query_port: 25565
-  motd: '&6&lTEENFOUNDERS NETWORK &7[1.21.11]\n&eCreative Plots &7| &bBuild Offs &7| &aSurvival Events'
+  motd: '&6&lTEENFOUNDERS SERVER &7[1.21.11]\n&eCreative Plots &7| &bBuild Offs &7| &aSurvival Events'
   tab_list: GLOBAL_PING
   query_enabled: true
   proxy_protocol: false

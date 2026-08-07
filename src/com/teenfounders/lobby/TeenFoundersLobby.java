@@ -67,15 +67,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Set spawn to FreeBuild2 plaza (0.5, 66.0, 17.5)
-            spawnLocation = new Location(world, 0.5, 66.0, 17.5, 0.0f, 0.0f);
-            world.setSpawnLocation(0, 66, 17);
+            // Set spawn to FreeMap8 plaza (0.5, 65.0, 0.5)
+            spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
+            world.setSpawnLocation(0, 65, 0);
 
             // Spawn NPCs after chunks load
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
         }
 
-        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeBuild2 World active at (0.5, 66.0, 17.5).");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 65.0, 0.5).");
     }
 
     private void configureWorld(World world) {
@@ -107,20 +107,20 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     public void spawnLobbyNPCs(World world) {
         if (world == null) return;
         double sx = 0.5;
-        double sy = 66.0;
-        double sz = 17.5;
+        double sy = 65.0;
+        double sz = 0.5;
 
         // 1. Creative Plots Master (X + 3.5)
-        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
+        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
         // 2. Survival Event Champion (X - 3.5)
-        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
+        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
         // 3. Build Offs Judge (Z + 3.5)
-        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
+        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
         // 4. PvP Gladiator (Z - 3.5)
-        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
+        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {

@@ -56,19 +56,32 @@ messages:
   outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
 EOF
 
-# 5. Force server-port=25565 in server.properties
+# 5. Force enable BungeeCord forwarding in config/paper-global.yml
+cat << 'EOF' > "$DATA_DIR/config/paper-global.yml"
+_version: 30
+
+proxies:
+  bungeecord:
+    online-mode: false
+  velocity:
+    enabled: false
+    online-mode: false
+    secret: ""
+EOF
+
+# 6. Force server-port=25565 & online-mode=false in server.properties
 if [ -f "$DATA_DIR/server.properties" ]; then
     sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
     sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
     sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
 fi
 
-# 6. Invoke Plugin Downloader
+# 7. Invoke Plugin Downloader
 if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 7. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
+# 8. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

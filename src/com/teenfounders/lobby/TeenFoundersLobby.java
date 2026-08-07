@@ -104,34 +104,37 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    private void spawnLobbyNPCs(World world) {
-        double sx = spawnLocation.getX();
-        double sy = spawnLocation.getY();
-        double sz = spawnLocation.getZ();
+    public void spawnLobbyNPCs(World world) {
+        if (world == null) return;
+        double sx = 0.5;
+        double sy = 66.0;
+        double sz = 17.5;
 
-        // 1. Creative Plots Master (X + 3)
-        createNPC(world, new Location(world, sx + 3.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
+        // 1. Creative Plots Master (X + 3.5)
+        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
 
-        // 2. Survival Event Champion (X - 3)
-        createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
+        // 2. Survival Event Champion (X - 3.5)
+        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
 
-        // 3. Build Offs Judge (Z + 3)
-        createNPC(world, new Location(world, sx, sy, sz + 3.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
+        // 3. Build Offs Judge (Z + 3.5)
+        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
 
-        // 4. PvP Gladiator (Z - 3)
-        createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
-
-        getLogger().info("4 Interactive Guide NPCs spawned at FreeBuild2 Plaza (0.5, 66.0, 17.5)!");
+        // 4. PvP Gladiator (Z - 3.5)
+        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
-        world.getChunkAtAsync(loc).thenAccept(chunk -> {
-            for (Entity e : loc.getNearbyEntities(1.5, 2.0, 1.5)) {
-                if (e.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
-                    return;
-                }
-            }
+        loc.getChunk().load(true);
+        boolean exists = false;
 
+        for (Entity e : world.getNearbyEntities(loc, 1.5, 2.5, 1.5)) {
+            if (e instanceof Villager && name.equals(e.getCustomName())) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
             Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
             npc.setCustomName(name);
             npc.setCustomNameVisible(true);
@@ -152,7 +155,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             holo.setVisible(false);
             holo.setMarker(true);
             holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
-        });
+        }
     }
 
     private void spawnRandomPet(Player player) {
@@ -195,7 +198,9 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        purgeMobs(player.getWorld());
+        World world = player.getWorld();
+        purgeMobs(world);
+        spawnLobbyNPCs(world);
 
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);

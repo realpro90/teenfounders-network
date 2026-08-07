@@ -1,74 +1,128 @@
-#!/bin/bash
-# ==============================================================================
-# TeenFounders Network - Universal Backend Server Entrypoint Script
-# Purpur / Paper 1.21.4 Engine Launcher with 5GB RAM & Aikar G1GC Flags
-# ==============================================================================
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  TeenFounders Build Network — Universal Backend Server Entrypoint          ║
+# ║  Purpur 1.21.4 Engine Launcher with Aikar G1GC Flags                      ║
+# ║  © 2026 TeenFounders · https://teenfounders.in                            ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 
-set -e
+set -euo pipefail
+
+# ─── Configuration ───────────────────────────────────────────────────────────
 
 DATA_DIR="/data"
 PAPER_VERSION="${PAPER_VERSION:-1.21.4}"
 MEMORY="${JAVA_MEMORY:-5G}"
 PORT="25565"
+SERVER_NAME="${SERVER_NAME:-backend}"
 
-echo "======================================================================"
-echo "          🚀 TEENFOUNDERS NETWORK - BACKEND SERVER LAUNCH 🚀         "
-echo "                 Server Name: ${SERVER_NAME:-backend}                 "
-echo "======================================================================"
+# ─── ANSI Colours ────────────────────────────────────────────────────────────
 
-mkdir -p "$DATA_DIR"
-mkdir -p "$DATA_DIR/config"
-mkdir -p "$DATA_DIR/plugins"
-cd "$DATA_DIR"
+readonly C_RESET='\033[0m'
+readonly C_BOLD='\033[1m'
+readonly C_ORANGE='\033[38;2;255;153;50m'
+readonly C_GREEN='\033[38;2;80;200;120m'
+readonly C_CYAN='\033[38;2;90;200;250m'
+readonly C_GRAY='\033[38;2;140;140;140m'
 
-# 1. Accept EULA automatically
-echo "eula=true" > "$DATA_DIR/eula.txt"
+# ─── Banner ──────────────────────────────────────────────────────────────────
 
-# 2. Sync forwarding secret key if available
-if [ -f "/server/forwarding.secret" ]; then
-    cp /server/forwarding.secret "$DATA_DIR/forwarding.secret"
+echo ""
+echo -e "${C_ORANGE}${C_BOLD}"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║                                                            ║"
+echo "║              TEENFOUNDERS BUILD NETWORK                    ║"
+echo "║          Minecraft Server · Railway Deploy                 ║"
+echo "║                                                            ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo -e "${C_RESET}"
+echo -e "  ${C_GRAY}Server: ${SERVER_NAME} · Engine: Purpur ${PAPER_VERSION} · RAM: ${MEMORY}${C_RESET}"
+echo ""
+
+# ─── Helper: set a property without duplicates ──────────────────────────────
+
+set_property() {
+    local key="$1" value="$2" file="$3"
+    touch "${file}"
+    if grep -q "^${key}=" "${file}" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
+    else
+        echo "${key}=${value}" >> "${file}"
+    fi
+}
+
+# ─── Step 1: Create directories ─────────────────────────────────────────────
+
+mkdir -p "${DATA_DIR}" "${DATA_DIR}/config" "${DATA_DIR}/plugins" "${DATA_DIR}/logs"
+cd "${DATA_DIR}"
+
+echo -e "  ${C_GREEN}✓${C_RESET} Directories initialised"
+
+# ─── Step 2: Accept EULA ────────────────────────────────────────────────────
+
+echo "eula=true" > "${DATA_DIR}/eula.txt"
+echo -e "  ${C_GREEN}✓${C_RESET} EULA accepted"
+
+# ─── Step 3: Sync forwarding secret ─────────────────────────────────────────
+
+if [[ -f "/server/forwarding.secret" ]]; then
+    cp /server/forwarding.secret "${DATA_DIR}/forwarding.secret"
+    echo -e "  ${C_GREEN}✓${C_RESET} Forwarding secret synced"
 fi
 
-# 3. Sync repository plugins & configurations into /data/plugins
-if [ -d "/server/plugins" ]; then
-    echo "[TF-INIT] Syncing network plugin configurations (Citizens, DeluxeMenus, TAB, Essentials)..."
-    cp -rf /server/plugins/* "$DATA_DIR/plugins/" 2>/dev/null || true
+# ─── Step 4: Sync repository plugins & configs ──────────────────────────────
+
+if [[ -d "/server/plugins" ]]; then
+    cp -rf /server/plugins/* "${DATA_DIR}/plugins/" 2>/dev/null || true
+    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced"
 fi
 
-if [ -d "/server/config_templates" ]; then
-    cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
+if [[ -d "/server/config_templates" ]]; then
+    cp -rn /server/config_templates/* "${DATA_DIR}/" 2>/dev/null || true
 fi
 
-# 4. Jar Integrity Validation & Engine Downloader (Purpur 1.21.4 / Paper Compatible)
-JAR_FILE="$DATA_DIR/purpur-${PAPER_VERSION}.jar"
+# ─── Step 5: Download & Validate Server Engine ──────────────────────────────
+
+JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
-if [ ! -f "$JAR_FILE" ]; then
+if [[ ! -f "${JAR_FILE}" ]]; then
     NEED_DOWNLOAD=1
-elif ! unzip -t "$JAR_FILE" >/dev/null 2>&1; then
-    echo "[TF-INIT] Server jar archive validation failed. Re-downloading Purpur engine..."
-    rm -f "$JAR_FILE"
+elif ! unzip -t "${JAR_FILE}" >/dev/null 2>&1; then
+    echo -e "  ${C_CYAN}▸${C_RESET} Server jar validation failed — re-downloading"
+    rm -f "${JAR_FILE}"
     NEED_DOWNLOAD=1
 fi
 
-if [ "$NEED_DOWNLOAD" -eq 1 ]; then
-    echo "[TF-INIT] Downloading Purpur ${PAPER_VERSION} engine build (52MB)..."
-    curl -sSL -o "$JAR_FILE" "https://api.purpurmc.org/v2/purpur/${PAPER_VERSION}/latest/download"
-    echo "[TF-INIT] Purpur engine downloaded successfully. Size: $(du -h "$JAR_FILE" | awk '{print $1}')"
+if [[ "${NEED_DOWNLOAD}" -eq 1 ]]; then
+    echo -e "  ${C_CYAN}▸${C_RESET} Downloading Purpur ${PAPER_VERSION} engine..."
+    curl -fsSL -o "${JAR_FILE}" "https://api.purpurmc.org/v2/purpur/${PAPER_VERSION}/latest/download"
+    echo -e "  ${C_GREEN}✓${C_RESET} Engine downloaded ($(du -h "${JAR_FILE}" | awk '{print $1}'))"
+else
+    echo -e "  ${C_GREEN}✓${C_RESET} Engine already cached ($(du -h "${JAR_FILE}" | awk '{print $1}'))"
 fi
 
-# 5. Provision 500x500 Lobby Map if on lobby server
-if [ "${SERVER_NAME}" == "lobby" ] || [ -f "/server/lobby/setup_lobby_world.sh" ]; then
-    /bin/bash /server/lobby/setup_lobby_world.sh "$DATA_DIR" 2>/dev/null || true
+# ─── Step 6: Provision Lobby World (lobby server only) ───────────────────────
+
+if [[ "${SERVER_NAME}" == "lobby" ]]; then
+    if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
+        echo ""
+        /bin/bash /server/lobby/setup_lobby_world.sh "${DATA_DIR}"
+        echo ""
+    elif [[ -f "/server/common/setup_lobby_world.sh" ]]; then
+        echo ""
+        /bin/bash /server/common/setup_lobby_world.sh "${DATA_DIR}"
+        echo ""
+    fi
 fi
 
-# 6. Enable BungeeCord forwarding in spigot.yml
-if [ -f "$DATA_DIR/spigot.yml" ]; then
-    if grep -q "bungeecord:" "$DATA_DIR/spigot.yml"; then
-        sed -i 's/bungeecord:.*/bungeecord: true/' "$DATA_DIR/spigot.yml"
+# ─── Step 7: BungeeCord forwarding — spigot.yml ─────────────────────────────
+
+if [[ -f "${DATA_DIR}/spigot.yml" ]]; then
+    if grep -q "bungeecord:" "${DATA_DIR}/spigot.yml"; then
+        sed -i 's/bungeecord:.*/bungeecord: true/' "${DATA_DIR}/spigot.yml"
     fi
 else
-    cat << 'EOF' > "$DATA_DIR/spigot.yml"
+    cat << 'SPIGOT_EOF' > "${DATA_DIR}/spigot.yml"
 config-version: 12
 
 settings:
@@ -80,25 +134,21 @@ messages:
   server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
   outdated-client: "§c[TeenFounders] Outdated client! Please use Minecraft Java Edition 1.21.11."
   outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.4 with ViaVersion."
-EOF
+SPIGOT_EOF
 fi
+echo -e "  ${C_GREEN}✓${C_RESET} BungeeCord forwarding enabled (spigot.yml)"
 
-# 7. Preserving paper-global.yml settings via In-Place Edit
-if [ -f "$DATA_DIR/config/paper-global.yml" ]; then
-    python3 -c "
-import re
-path = '$DATA_DIR/config/paper-global.yml'
-with open(path, 'r') as f:
-    content = f.read()
-if 'bungeecord:' in content:
-    content = re.sub(r'(bungeecord:[\s\S]*?online-mode:\s*)\w+', r'\g<1>false', content)
-else:
-    content += '\nproxies:\n  bungeecord:\n    online-mode: false\n'
-with open(path, 'w') as f:
-    f.write(content)
-" 2>/dev/null || true
+# ─── Step 8: Paper-global.yml — proxy forwarding mode ───────────────────────
+
+mkdir -p "${DATA_DIR}/config"
+
+if [[ -f "${DATA_DIR}/config/paper-global.yml" ]]; then
+    # In-place edit: set online-mode to false under bungeecord
+    if grep -q "online-mode:" "${DATA_DIR}/config/paper-global.yml"; then
+        sed -i 's/online-mode:.*/online-mode: false/' "${DATA_DIR}/config/paper-global.yml"
+    fi
 else
-    cat << 'EOF' > "$DATA_DIR/config/paper-global.yml"
+    cat << 'PAPER_EOF' > "${DATA_DIR}/config/paper-global.yml"
 _version: 30
 
 proxies:
@@ -108,41 +158,29 @@ proxies:
     enabled: false
     online-mode: false
     secret: ""
-EOF
+PAPER_EOF
+fi
+echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
+
+# ─── Step 9: server.properties — core settings ──────────────────────────────
+
+set_property "online-mode"      "false"     "${DATA_DIR}/server.properties"
+set_property "server-port"      "25565"     "${DATA_DIR}/server.properties"
+set_property "server-ip"        "0.0.0.0"   "${DATA_DIR}/server.properties"
+set_property "spawn-protection" "0"         "${DATA_DIR}/server.properties"
+
+echo -e "  ${C_GREEN}✓${C_RESET} server.properties configured"
+
+# ─── Step 10: Download plugins ──────────────────────────────────────────────
+
+if [[ -f "/server/scripts/download-plugins.sh" ]]; then
+    echo ""
+    /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
+    echo ""
 fi
 
-# 8. Force online-mode=false, spawn protection & server-port=25565 in server.properties
-touch "$DATA_DIR/server.properties"
-if grep -q "^online-mode=" "$DATA_DIR/server.properties"; then
-    sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
-else
-    echo "online-mode=false" >> "$DATA_DIR/server.properties"
-fi
+# ─── Step 11: Launch Server ──────────────────────────────────────────────────
 
-if grep -q "^server-port=" "$DATA_DIR/server.properties"; then
-    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
-else
-    echo "server-port=25565" >> "$DATA_DIR/server.properties"
-fi
-
-if grep -q "^server-ip=" "$DATA_DIR/server.properties"; then
-    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
-else
-    echo "server-ip=0.0.0.0" >> "$DATA_DIR/server.properties"
-fi
-
-if grep -q "^spawn-protection=" "$DATA_DIR/server.properties"; then
-    sed -i 's/^spawn-protection=.*/spawn-protection=0/' "$DATA_DIR/server.properties"
-else
-    echo "spawn-protection=0" >> "$DATA_DIR/server.properties"
-fi
-
-# 9. Invoke Plugin Downloader Script
-if [ -f "/server/scripts/download-plugins.sh" ]; then
-    /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
-fi
-
-# 10. Aikar's High-Performance G1GC JVM Flags (5GB RAM)
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"
@@ -167,5 +205,9 @@ JVM_FLAGS=(
     "-Dusing.aikars.flags=https://mcflags.emc.gs"
 )
 
-echo "[TF-INIT] Launching Purpur ${PAPER_VERSION} Engine (online-mode=false) on Port 25565 with ${MEMORY} RAM..."
-exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui
+echo -e "${C_ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
+echo -e "  ${C_GREEN}${C_BOLD}▶ Launching Purpur ${PAPER_VERSION} on :${PORT} with ${MEMORY} RAM${C_RESET}"
+echo -e "${C_ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
+echo ""
+
+exec java "${JVM_FLAGS[@]}" -jar "${JAR_FILE}" nogui

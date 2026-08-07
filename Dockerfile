@@ -1,49 +1,54 @@
-# ==============================================================================
-# TeenFounders Build Network - Minecraft Java 1.21.11 Production Dockerfile
-# Optimized for Railway Deployment with Java 21 & PaperMC Engine
-# Branding: TeenFounders (https://teenfounders.in) - Orange (#FF9932) / White / Black
-# ==============================================================================
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  TeenFounders Build Network — Production Dockerfile                        ║
+# ║  Minecraft Java 1.21.11 · Purpur 1.21.4 Engine · Railway Optimised        ║
+# ║  © 2026 TeenFounders · https://teenfounders.in                            ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 
 FROM eclipse-temurin:21-jre-alpine
 
-# Set environment variables
-ENV PAPER_VERSION="1.21.11" \
+# ─── Environment ─────────────────────────────────────────────────────────────
+ENV PAPER_VERSION="1.21.4" \
     DATA_DIR="/data" \
     JAVA_MEMORY="4G" \
     PORT="25565" \
     EULA="true"
 
-# Install necessary runtime utilities
-RUN apk add --no-gradable --no-cache \
+# ─── Runtime Dependencies ───────────────────────────────────────────────────
+RUN apk add --no-cache \
     curl \
     jq \
     bash \
     netcat-openbsd \
     ca-certificates \
     tzdata \
+    gzip \
+    tar \
+    coreutils \
     && rm -rf /var/cache/apk/*
 
-# Create working directory and data volume mount point
+# ─── Working Directory ──────────────────────────────────────────────────────
 WORKDIR /server
 
-# Copy startup scripts and configurations into image build context
-COPY entrypoint.sh /server/entrypoint.sh
-COPY scripts/ /server/scripts/
+# ─── Copy Application Files ─────────────────────────────────────────────────
+COPY entrypoint.sh    /server/entrypoint.sh
+COPY scripts/         /server/scripts/
+COPY lobby/           /server/lobby/
+COPY plugins/         /server/plugins/
+COPY config_templates/ /server/config_templates/
 
-# Grant executable permissions to scripts
-RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh
+# ─── Permissions ─────────────────────────────────────────────────────────────
+RUN chmod +x /server/entrypoint.sh \
+    && chmod +x /server/scripts/*.sh 2>/dev/null || true \
+    && chmod +x /server/lobby/*.sh 2>/dev/null || true
 
-# Expose Minecraft server default port and Bedrock UDP port (for Geyser)
+# ─── Ports ───────────────────────────────────────────────────────────────────
 EXPOSE 25565/tcp
 EXPOSE 25565/udp
 EXPOSE 19132/udp
 
-# Mount volume for persistent storage on Railway via Railway Dashboard/CLI
-# EXPOSE ports for Minecraft server
-
-# Define container healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# ─── Health Check ────────────────────────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD /server/scripts/healthcheck.sh || exit 1
 
-# Define container entrypoint
+# ─── Entrypoint ──────────────────────────────────────────────────────────────
 ENTRYPOINT ["/bin/bash", "/server/entrypoint.sh"]

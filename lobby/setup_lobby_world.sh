@@ -635,9 +635,10 @@ _install_lobby() {
     # ── Step 3: Wipe old world & prepare directories ─────────────────────
     _section "Preparing World Directory"
 
-    _info "Removing old terrain data..."
+    _info "Removing old terrain & player logoff data..."
     rm -rf "${WORLD_DIR}"
-    _ok "Old world removed"
+    rm -rf "${DATA_DIR}/plugins/Essentials/userdata"
+    _ok "Old world & player logoff data removed"
 
     mkdir -p "${WORLD_DIR}"
     for dir in "${REQUIRED_WORLD_DIRS[@]}" "${OPTIONAL_WORLD_DIRS[@]}"; do

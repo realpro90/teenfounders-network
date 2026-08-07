@@ -30,7 +30,9 @@ currency-symbol: '$'
 max-money: 100000000000000
 
 spawn-on-join: true
-respawn-at-home: true
+force-spawn-on-join: true
+respawn-at-home: false
+respawn-at-anchor: false
 
 chat:
   radius: 0

@@ -11,8 +11,8 @@ function tf:build_plaza
 function tf:build_portals
 function tf:build_decorations
 
-# ─── Teleport to spawn facing beacon monument ───────────────────
-tp @s 0.5 65.0 8.0 0 -5
+# ─── Force Teleport to Central Plaza Spawn (0.5, 65.0, 0.5) ─────
+tp @a 0.5 65.0 0.5 0 0
 
 # ─── Welcome Title Animation ────────────────────────────────────
 title @s times 20 80 20

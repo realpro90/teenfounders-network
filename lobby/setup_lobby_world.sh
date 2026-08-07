@@ -646,7 +646,7 @@ _install_lobby() {
     done
     _ok "World directory structure created"
 
-    # ── Step 4: Extract pre-packaged local or downloaded world ───────────
+    # ── Step 4: Extract pre-packaged local or downloadedd world ───────────
     _section "Installing Production Lobby World Package"
 
     local user_tar="/server/lobby/lobbyworld.tar.gz"

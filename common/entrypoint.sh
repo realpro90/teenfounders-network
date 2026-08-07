@@ -131,9 +131,8 @@ if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 10. Aikar's High-Performance G1GC JVM Flags (5GB RAM + IPv6 Mesh)
+# 10. Aikar's High-Performance G1GC JVM Flags (5GB RAM)
 JVM_FLAGS=(
-    "-Djava.net.preferIPv6Addresses=true"
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"
     "-XX:+UseG1GC"

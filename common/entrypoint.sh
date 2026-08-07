@@ -182,8 +182,8 @@ fi
 # ─── Step 11: Launch Server ──────────────────────────────────────────────────
 
 JVM_FLAGS=(
-    # Railway IPv6 private mesh compatibility — CRITICAL
-    "-Djava.net.preferIPv6Addresses=true"
+    # Railway dual-stack: listen on IPv6 for proxy, but use IPv4 for outbound downloads
+    # DO NOT set preferIPv6Addresses=true — it breaks Mojang/Modrinth CDN downloads
     "-Djava.net.preferIPv4Stack=false"
     # Memory
     "-Xms${MEMORY}"

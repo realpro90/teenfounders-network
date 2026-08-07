@@ -30,5 +30,5 @@ COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 
-# Run BungeeCord with preferIPv6Addresses for Railway mesh DNS resolution
-ENTRYPOINT ["java", "-Djava.net.preferIPv6Addresses=true", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]
+# Run BungeeCord with dual-stack networking for Railway mesh DNS resolution
+ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=false", "-Djava.net.preferIPv6Addresses=true", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]

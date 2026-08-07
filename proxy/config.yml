@@ -13,7 +13,7 @@ listeners:
   ping_passthrough: false
   priorities:
   - lobby
-  bind_local_address: true
+  bind_local_address: false
   host: 0.0.0.0:25565
   max_players: 100
   tab_size: 60

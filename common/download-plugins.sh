@@ -47,7 +47,7 @@ download_plugin "LuckPerms" "https://cdn.modrinth.com/data/Vebnzrzj/versions/b0m
 
 # 2. Essentials Suite
 download_plugin "EssentialsX" "https://cdn.modrinth.com/data/hXiIvTyT/versions/nY6VN1XH/EssentialsX-2.22.0.jar" 3000000
-download_plugin "EssentialsXSpawn" "https://cdn.modrinth.com/data/hXiIvTyT/versions/puUfqBpY/EssentialsXSpawn-2.20.1.jar" 15000
+download_plugin "EssentialsXSpawn" "https://cdn.modrinth.com/data/hXiIvTyT/versions/nY6VN1XH/EssentialsXSpawn-2.22.0.jar" 15000
 
 # 3. World Management & Editing
 download_plugin "FastAsyncWorldEdit" "https://cdn.modrinth.com/data/z4HZZnLr/versions/wDzcK7Sn/FastAsyncWorldEdit-Bukkit-2.15.3.jar" 10000000

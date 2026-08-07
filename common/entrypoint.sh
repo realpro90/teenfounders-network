@@ -1,14 +1,14 @@
 #!/bin/bash
 # ==============================================================================
 # TeenFounders Network - Universal Backend Server Entrypoint Script
-# PaperMC 1.21.11 / Java 21 Engine Launcher with Aikar G1GC Flags & Database Bindings
+# Purpur / Paper 1.21.4 Engine Launcher with 5GB RAM & Aikar G1GC Flags
 # ==============================================================================
 
 set -e
 
 DATA_DIR="/data"
-PAPER_VERSION="${PAPER_VERSION:-1.21.11}"
-MEMORY="${JAVA_MEMORY:-3G}"
+PAPER_VERSION="${PAPER_VERSION:-1.21.4}"
+MEMORY="${JAVA_MEMORY:-5G}"
 PORT="25565"
 
 echo "======================================================================"
@@ -24,19 +24,27 @@ cd "$DATA_DIR"
 # 1. Accept EULA automatically
 echo "eula=true" > "$DATA_DIR/eula.txt"
 
-# 2. Sync velocity forwarding secret key
+# 2. Sync forwarding secret key if available
 if [ -f "/server/forwarding.secret" ]; then
     cp /server/forwarding.secret "$DATA_DIR/forwarding.secret"
 fi
 
-# 3. Download PaperMC Server Jar if missing or corrupted (< 10MB)
-JAR_FILE="$DATA_DIR/paper-${PAPER_VERSION}.jar"
+# 3. Jar Integrity Validation & Engine Downloader (Purpur 1.21.4 / Paper Compatible)
+JAR_FILE="$DATA_DIR/purpur-${PAPER_VERSION}.jar"
+NEED_DOWNLOAD=0
 
-if [ ! -f "$JAR_FILE" ] || [ $(wc -c <"$JAR_FILE" 2>/dev/null || echo 0) -lt 10000000 ]; then
+if [ ! -f "$JAR_FILE" ]; then
+    NEED_DOWNLOAD=1
+elif ! unzip -t "$JAR_FILE" >/dev/null 2>&1; then
+    echo "[TF-INIT] Server jar archive validation failed. Re-downloading Purpur engine..."
     rm -f "$JAR_FILE"
-    echo "[TF-INIT] Downloading direct PaperMC 1.21.11 compatible engine build (52MB)..."
-    curl -sSL -o "$JAR_FILE" "https://api.purpurmc.org/v2/purpur/1.21.4/latest/download"
-    echo "[TF-INIT] PaperMC engine downloaded successfully. Size: $(du -h "$JAR_FILE" | awk '{print $1}')"
+    NEED_DOWNLOAD=1
+fi
+
+if [ "$NEED_DOWNLOAD" -eq 1 ]; then
+    echo "[TF-INIT] Downloading Purpur ${PAPER_VERSION} engine build (52MB)..."
+    curl -sSL -o "$JAR_FILE" "https://api.purpurmc.org/v2/purpur/${PAPER_VERSION}/latest/download"
+    echo "[TF-INIT] Purpur engine downloaded successfully. Size: $(du -h "$JAR_FILE" | awk '{print $1}')"
 fi
 
 # 4. Sync configuration templates if provided
@@ -49,8 +57,13 @@ if [ "${SERVER_NAME}" == "lobby" ] || [ -f "/server/lobby/setup_lobby_world.sh" 
     /bin/bash /server/lobby/setup_lobby_world.sh "$DATA_DIR" 2>/dev/null || true
 fi
 
-# 6. Force enable BungeeCord forwarding in spigot.yml
-cat << 'EOF' > "$DATA_DIR/spigot.yml"
+# 6. Enable BungeeCord forwarding in spigot.yml
+if [ -f "$DATA_DIR/spigot.yml" ]; then
+    if grep -q "bungeecord:" "$DATA_DIR/spigot.yml"; then
+        sed -i 's/bungeecord:.*/bungeecord: true/' "$DATA_DIR/spigot.yml"
+    fi
+else
+    cat << 'EOF' > "$DATA_DIR/spigot.yml"
 config-version: 12
 
 settings:
@@ -61,11 +74,26 @@ messages:
   unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
   server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
   outdated-client: "§c[TeenFounders] Outdated client! Please use Minecraft Java Edition 1.21.11."
-  outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
+  outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.4 with ViaVersion."
 EOF
+fi
 
-# 7. Force enable BungeeCord forwarding in config/paper-global.yml
-cat << 'EOF' > "$DATA_DIR/config/paper-global.yml"
+# 7. Preserving paper-global.yml settings via In-Place Edit
+if [ -f "$DATA_DIR/config/paper-global.yml" ]; then
+    python3 -c "
+import re
+path = '$DATA_DIR/config/paper-global.yml'
+with open(path, 'r') as f:
+    content = f.read()
+if 'bungeecord:' in content:
+    content = re.sub(r'(bungeecord:[\s\S]*?online-mode:\s*)\w+', r'\g<1>false', content)
+else:
+    content += '\nproxies:\n  bungeecord:\n    online-mode: false\n'
+with open(path, 'w') as f:
+    f.write(content)
+" 2>/dev/null || true
+else
+    cat << 'EOF' > "$DATA_DIR/config/paper-global.yml"
 _version: 30
 
 proxies:
@@ -76,6 +104,7 @@ proxies:
     online-mode: false
     secret: ""
 EOF
+fi
 
 # 8. Force online-mode=false & server-port=25565 in server.properties
 touch "$DATA_DIR/server.properties"
@@ -102,7 +131,7 @@ if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 10. Aikar's High-Performance G1GC JVM Flags with IPv6 Mesh Enabled
+# 10. Aikar's High-Performance G1GC JVM Flags (5GB RAM + IPv6 Mesh)
 JVM_FLAGS=(
     "-Djava.net.preferIPv6Addresses=true"
     "-Xms${MEMORY}"
@@ -126,8 +155,7 @@ JVM_FLAGS=(
     "-XX:+PerfDisableSharedMem"
     "-XX:MaxTenuringThreshold=1"
     "-Dusing.aikars.flags=https://mcflags.emc.gs"
-    "-Daio.paper.async-chunk-loading=true"
 )
 
-echo "[TF-INIT] Executing Java PaperMC Engine (offline-mode=false) on Port 25565 with ${MEMORY} RAM..."
+echo "[TF-INIT] Launching Purpur ${PAPER_VERSION} Engine (online-mode=false) on Port 25565 with ${MEMORY} RAM..."
 exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui

@@ -9,10 +9,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,6 +28,7 @@ import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -40,30 +44,30 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     private Location spawnLocation;
     private NamespacedKey itemKey;
+    private NamespacedKey npcKey;
 
     @Override
     public void onEnable() {
         itemKey = new NamespacedKey(this, "lobby_item");
+        npcKey = new NamespacedKey(this, "lobby_npc");
         Bukkit.getPluginManager().registerEvents(this, this);
 
         World world = Bukkit.getWorlds().get(0);
         if (world != null) {
             configureWorld(world);
-
-            // Use world spawn from level.dat or default to (0.5, 65.0, 0.5)
+            
             Location worldSpawn = world.getSpawnLocation();
             if (worldSpawn != null) {
-                spawnLocation = new Location(world, worldSpawn.getX() + 0.5, worldSpawn.getY() + 0.5,
-                        worldSpawn.getZ() + 0.5, worldSpawn.getYaw(), worldSpawn.getPitch());
+                spawnLocation = new Location(world, worldSpawn.getX() + 0.5, worldSpawn.getY() + 0.5, worldSpawn.getZ() + 0.5, worldSpawn.getYaw(), worldSpawn.getPitch());
             } else {
                 spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
             }
 
-            // Purge all mobs and slimes
             purgeMobs(world);
+            spawnLobbyNPCs(world);
         }
 
-        getLogger().info("TeenFoundersLobby v3.5 enabled! Custom lobbyworld active, Spawn set to " + spawnLocation);
+        getLogger().info("TeenFoundersLobby v4.0 enabled! Interactive NPCs spawned, Void Guard active, Inventory Sync online.");
     }
 
     private void configureWorld(World world) {
@@ -82,10 +86,62 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     private void purgeMobs(World world) {
         for (Entity entity : world.getEntities()) {
-            if (entity instanceof Mob || entity instanceof Slime) {
+            if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING))) {
                 entity.remove();
             }
         }
+    }
+
+    private void spawnLobbyNPCs(World world) {
+        double sx = spawnLocation.getX();
+        double sy = spawnLocation.getY();
+        double sz = spawnLocation.getZ();
+
+        // Remove old NPCs to prevent duplicates
+        for (Entity entity : world.getEntities()) {
+            if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+                entity.remove();
+            }
+        }
+
+        // 1. Creative Plots Master (X + 5)
+        createNPC(world, new Location(world, sx + 5.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Right-Click to Join!");
+
+        // 2. Survival Event Champion (X - 5)
+        createNPC(world, new Location(world, sx - 5.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Event · Right-Click to Join!");
+
+        // 3. Build Offs Judge (Z + 5)
+        createNPC(world, new Location(world, sx, sy, sz + 5.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Right-Click to Join!");
+
+        // 4. PvP Gladiator (Z - 5)
+        createNPC(world, new Location(world, sx, sy, sz - 5.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
+
+        getLogger().info("4 Interactive Server Guide NPCs spawned successfully!");
+    }
+
+    private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
+        Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
+        npc.setCustomName(name);
+        npc.setCustomNameVisible(true);
+        npc.setProfession(Villager.Profession.LIBRARIAN);
+        npc.setVillagerType(Villager.Type.PLAINS);
+        npc.setAI(false);
+        npc.setInvulnerable(true);
+        npc.setSilent(true);
+        npc.setCollidable(false);
+        npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+
+        // Subtitle Hologram
+        Location holoLoc = loc.clone().add(0, 2.2, 0);
+        ArmorStand holo = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
+        holo.setCustomName(subtitle);
+        holo.setCustomNameVisible(true);
+        holo.setGravity(false);
+        holo.setCanPickupItems(false);
+        holo.setCustomNameVisible(true);
+        holo.setVisible(false);
+        holo.setMarker(true);
+        holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -93,6 +149,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         purgeMobs(player.getWorld());
 
+        // Guaranteed Triple Teleport to Spawn Location
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 15L);
@@ -105,21 +162,39 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         player.sendMessage("§6§m--------------------------------------------------");
         player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
-        player.sendMessage(
-                "  §fWelcome, §e" + player.getName() + "§f! Use your §6Server Navigator §fto choose a game mode.");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Talk to any §6Guide NPC §fto join a game mode.");
+        player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
+        player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
         player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
         player.sendMessage("§6§m--------------------------------------------------");
     }
 
     private void teleportToSpawn(Player player) {
         if (spawnLocation != null && player.isOnline()) {
+            player.setFallDistance(0.0f);
             player.teleport(spawnLocation);
         }
     }
 
     @EventHandler
+    public void onNPCInteract(PlayerInteractEntityEvent event) {
+        Entity entity = event.getRightClicked();
+        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+            String target = entity.getPersistentDataContainer().get(npcKey, PersistentDataType.STRING);
+            if (target != null && !target.startsWith("holo_")) {
+                Player player = event.getPlayer();
+                player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+                player.sendTitle("§6§lCONNECTING...", "§fSwitching to " + target.toUpperCase() + " server", 5, 40, 10);
+                player.performCommand("server " + target);
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
-        if (event.getEntity() instanceof Mob || event.getEntity() instanceof Slime) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING))) {
             event.setCancelled(true);
         }
     }
@@ -142,38 +217,34 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
 
-        player.getInventory().setItem(0,
-                createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Right-click to open server menu"));
-        player.getInventory().setItem(1,
-                createItem(Material.CLOCK, "cosmetics", "§b§lCosmetics", "§7Right-click to open cosmetics"));
-        player.getInventory().setItem(4,
-                createItem(Material.BOOK, "rules", "§e§lRules & Info", "§7Right-click to read network rules"));
-        player.getInventory().setItem(8,
-                createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
+        player.getInventory().setItem(0, createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Right-click to open server menu"));
+        player.getInventory().setItem(1, createItem(Material.CLOCK, "cosmetics", "§b§lCosmetics", "§7Right-click to open cosmetics"));
+        player.getInventory().setItem(4, createItem(Material.BOOK, "rules", "§e§lRules & Info", "§7Right-click to read network rules"));
+        player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
+
+        player.updateInventory();
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
-
-        // Void guard: If player falls below Y = 0, teleport back to spawn
-        if (loc.getY() < 0) {
+        
+        // Instant Void Protection Guard (Teleports back to spawn if Y < 40 or Y < 0)
+        if (loc.getY() < 40) {
             teleportToSpawn(player);
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.getPlayer().isOp())
-            event.setCancelled(true);
+        if (!event.getPlayer().isOp()) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!event.getPlayer().isOp())
-            event.setCancelled(true);
+        if (!event.getPlayer().isOp()) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -219,11 +290,10 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block b = event.getClickedBlock();
+            org.bukkit.block.Block b = event.getClickedBlock();
             if (b != null && !player.isOp()) {
                 Material m = b.getType();
-                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER")
-                        || m.name().contains("CHEST")) {
+                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER") || m.name().contains("CHEST")) {
                     event.setCancelled(true);
                 }
             }

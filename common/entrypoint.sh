@@ -172,10 +172,13 @@ echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
 
 # ─── Step 9: server.properties — core settings ──────────────────────────────
 
-set_property "online-mode"      "false"     "${DATA_DIR}/server.properties"
-set_property "server-port"      "25565"     "${DATA_DIR}/server.properties"
-set_property "server-ip"        "0.0.0.0"   "${DATA_DIR}/server.properties"
-set_property "spawn-protection" "0"         "${DATA_DIR}/server.properties"
+set_property "online-mode"          "false"     "${DATA_DIR}/server.properties"
+set_property "server-port"          "25565"     "${DATA_DIR}/server.properties"
+set_property "server-ip"            "0.0.0.0"   "${DATA_DIR}/server.properties"
+set_property "spawn-protection"     "0"         "${DATA_DIR}/server.properties"
+set_property "level-type"            "flat"      "${DATA_DIR}/server.properties"
+set_property "generate-structures" "false"     "${DATA_DIR}/server.properties"
+set_property "generator-settings"  "{\"layers\":[{\"block\":\"minecraft:bedrock\",\"height\":1},{\"block\":\"minecraft:blackstone\",\"height\":5},{\"block\":\"minecraft:smooth_quartz\",\"height\":1}],\"biome\":\"minecraft:plains\",\"features\":false}" "${DATA_DIR}/server.properties"
 
 echo -e "  ${C_GREEN}✓${C_RESET} server.properties configured"
 

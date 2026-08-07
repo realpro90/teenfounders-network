@@ -25,7 +25,17 @@ cd "$DATA_DIR"
 echo "eula=true" > "$DATA_DIR/eula.txt"
 echo "[TF-INIT] EULA accepted automatically."
 
-# 2. Jar Integrity Validation & Engine Downloader (Purpur 1.21.4 / Paper Compatible)
+# 2. Sync repository plugins & configurations into /data/plugins
+if [ -d "/server/plugins" ]; then
+    echo "[TF-INIT] Syncing network plugin configurations (Citizens, DeluxeMenus, TAB, Essentials)..."
+    cp -rf /server/plugins/* "$DATA_DIR/plugins/" 2>/dev/null || true
+fi
+
+if [ -d "/server/config_templates" ]; then
+    cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
+fi
+
+# 3. Jar Integrity Validation & Engine Downloader (Purpur 1.21.4 / Paper Compatible)
 JAR_FILE="$DATA_DIR/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
@@ -41,12 +51,6 @@ if [ "$NEED_DOWNLOAD" -eq 1 ]; then
     echo "[TF-INIT] Downloading Purpur ${PAPER_VERSION} engine build (52MB)..."
     curl -sSL -o "$JAR_FILE" "https://api.purpurmc.org/v2/purpur/${PAPER_VERSION}/latest/download"
     echo "[TF-INIT] Purpur engine downloaded successfully. Size: $(du -h "$JAR_FILE" | awk '{print $1}')"
-fi
-
-# 3. Synchronize configuration files from default repo templates
-if [ -d "/server/config_templates" ]; then
-    echo "[TF-INIT] Syncing server configuration templates..."
-    cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
 fi
 
 # 4. Provision 500x500 Lobby Map if setup script exists
@@ -103,7 +107,7 @@ proxies:
 EOF
 fi
 
-# 7. Force online-mode=false & server-port=25565 in server.properties
+# 7. Force online-mode=false, spawn-protection=0 & server-port=25565 in server.properties
 touch "$DATA_DIR/server.properties"
 if grep -q "^online-mode=" "$DATA_DIR/server.properties"; then
     sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
@@ -121,6 +125,12 @@ if grep -q "^server-ip=" "$DATA_DIR/server.properties"; then
     sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
 else
     echo "server-ip=0.0.0.0" >> "$DATA_DIR/server.properties"
+fi
+
+if grep -q "^spawn-protection=" "$DATA_DIR/server.properties"; then
+    sed -i 's/^spawn-protection=.*/spawn-protection=0/' "$DATA_DIR/server.properties"
+else
+    echo "spawn-protection=0" >> "$DATA_DIR/server.properties"
 fi
 
 # 8. Invoke Plugin Downloader

@@ -7,19 +7,21 @@ config-version = "2.7"
 bind = "0.0.0.0:25565"
 motd = "<gradient:#FF9932:#FFD175><bold>TEENFOUNDERS NETWORK</bold></gradient> <gray>[1.21.11]</gray>\n<yellow>Creative Plots <gray>|</gray> Build Offs <gray>|</gray> Survival Seasons <gray>|</gray> PvP</yellow>"
 show-max-players = 100
-online-mode = true
-prevent-client-proxy-connections = false
-player-info-forwarding-mode = "modern"
+online-mode = false
+force-key-authentication = false
+
+# Player info forwarding mode: "none", "legacy", "bungeecord", "modern"
+player-info-forwarding-mode = "bungeecord"
 forwarding-secret-file = "forwarding.secret"
 announce-forge = false
 kick-existing-players = false
 
 [servers]
-lobby = "lobby:25565"
-creative = "creative:25565"
-competition = "competition:25565"
-survival-event = "survival-event:25565"
-pvp = "pvp:25565"
+lobby = "lobby.railway.internal:25565"
+creative = "creative.railway.internal:25565"
+competition = "competition.railway.internal:25565"
+survival-event = "survival-event.railway.internal:25565"
+pvp = "pvp.railway.internal:25565"
 
 try = [
   "lobby"

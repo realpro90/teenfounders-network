@@ -1,22 +1,22 @@
 package com.teenfounders.lobby;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -42,7 +42,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             world.setSpawnLocation(0, 65, 0);
         }
 
-        getLogger().info("TeenFoundersLobby v2.0 enabled successfully! World & Spawn initialized.");
+        getLogger().info("TeenFoundersLobby v2.1 enabled! 1-tick teleport, complete block protection & no-PvP active.");
     }
 
     private void configureWorld(World world) {
@@ -112,20 +112,18 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
 
         // 3. Portals
-        buildPortalArch(world, 0, 64, -40, Material.ORANGE_CONCRETE, Material.ORANGE_STAINED_GLASS, "§6§l🎨 CREATIVE");
-        buildPortalArch(world, 0, 64, 40, Material.YELLOW_CONCRETE, Material.YELLOW_STAINED_GLASS, "§e§l🏆 COMPETITION");
-        buildPortalArch(world, -40, 64, 0, Material.GREEN_CONCRETE, Material.LIME_STAINED_GLASS, "§a§l⚔ SURVIVAL");
-        buildPortalArch(world, 40, 64, 0, Material.RED_CONCRETE, Material.RED_STAINED_GLASS, "§c§l⚔ PVP ARENA");
+        buildPortalArch(world, 0, 64, -40, Material.ORANGE_CONCRETE, Material.ORANGE_STAINED_GLASS);
+        buildPortalArch(world, 0, 64, 40, Material.YELLOW_CONCRETE, Material.YELLOW_STAINED_GLASS);
+        buildPortalArch(world, -40, 64, 0, Material.GREEN_CONCRETE, Material.LIME_STAINED_GLASS);
+        buildPortalArch(world, 40, 64, 0, Material.RED_CONCRETE, Material.RED_STAINED_GLASS);
     }
 
-    private void buildPortalArch(World world, int cx, int cy, int cz, Material frame, Material glass, String title) {
+    private void buildPortalArch(World world, int cx, int cy, int cz, Material frame, Material glass) {
         boolean isZAxis = (cx == 0);
-
         for (int i = -3; i <= 3; i++) {
             for (int h = 0; h <= 6; h++) {
                 int x = isZAxis ? cx + i : cx;
                 int z = isZAxis ? cz : cz + i;
-
                 if (i == -3 || i == 3 || h == 0 || h == 6) {
                     world.getBlockAt(x, cy + h, z).setType(frame, false);
                 } else {
@@ -139,9 +137,19 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (spawnLocation != null) {
-            player.teleport(spawnLocation);
-        }
+        // 1-tick delayed teleport guarantees PaperMC moves player to (0.5, 65.0, 0.5)
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (spawnLocation != null && player.isOnline()) {
+                player.teleport(spawnLocation);
+            }
+        }, 1L);
+
+        // 5-tick backup teleport for slow loading clients
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (spawnLocation != null && player.isOnline()) {
+                player.teleport(spawnLocation);
+            }
+        }, 5L);
 
         player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
@@ -176,17 +184,45 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
-    public void onDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
+    // Protection: Prevent Breaking Blocks
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (!event.getPlayer().isOp()) {
             event.setCancelled(true);
         }
     }
 
+    // Protection: Prevent Placing Blocks
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (!event.getPlayer().isOp()) {
+            event.setCancelled(true);
+        }
+    }
+
+    // Protection: Prevent All Damage & PvP Fighting
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDamage(EntityDamageEvent event) {
+        event.setCancelled(true);
+    }
+
+    // Protection: Prevent PvP Specifically
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPvP(EntityDamageByEntityEvent event) {
+        event.setCancelled(true);
+    }
+
+    // Protection: Lock Hunger
     @EventHandler
     public void onHunger(FoodLevelChangeEvent event) {
         event.setCancelled(true);
         event.setFoodLevel(20);
+    }
+
+    // Protection: Prevent Dropping Items
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent event) {
+        event.setCancelled(true);
     }
 
     @EventHandler

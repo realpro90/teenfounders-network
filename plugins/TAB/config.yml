@@ -12,7 +12,7 @@ header-footer:
     - ""
   footer:
     - ""
-    - "§7Players Online: §e%online% §7/ §e%max_players%  §7|  Ping: §a%ping%ms  §7|  TPS: §a%tps%"
+    - "§7Players Online: §e%online% §7/ §e%max_players%  §7|  Ping: §a%ping%ms  §7|  Time: §e%time%"
     - "§6Use §e/menu §6or §e/help §6for navigation & builder tools"
     - ""
   change-interval: 1000
@@ -30,13 +30,14 @@ scoreboard:
   lines:
     - "§7§m------------------------"
     - "§fPlayer: §e%player_name%"
-    - "§fServer: §eTeenFounders Lobby"
+    - "§fServer: §eTeenFounders"
     - "§fRank: §aMember"
     - ""
     - "§6§lNETWORK INFO"
     - "§fOnline: §a%online%§7/§a%max_players%"
     - "§fTPS: §a20.0"
     - "§fPing: §a%ping%ms"
+    - "§fTime: §e%time%"
     - ""
     - "§6§lBUILDER TOOLS"
     - "§fPlot World: §e/warp plots"

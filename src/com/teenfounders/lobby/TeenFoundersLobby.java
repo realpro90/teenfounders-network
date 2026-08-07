@@ -46,19 +46,17 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Check if beacon monument exists at (0, 64, 0). If not, build the lobby structure immediately!
+            // Build 200x200 Plaza if beacon monument doesn't exist
             Block centerBlock = world.getBlockAt(0, 64, 0);
             if (centerBlock.getType() != Material.BEACON) {
                 buildLobbyStructure(world);
-            } else {
-                getLogger().info("Central Plaza structure verified at (0,64,0) — skipping rebuild.");
             }
 
             spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, -5.0f);
             world.setSpawnLocation(0, 65, 0);
         }
 
-        getLogger().info("TeenFoundersLobby v3.1 enabled! Central Plaza verified, spawn point set to (0.5, 65.0, 0.5).");
+        getLogger().info("TeenFoundersLobby v3.2 enabled! 200x200 Central Plaza active, Spawn set to (0.5, 65.0, 0.5).");
     }
 
     private void configureWorld(World world) {
@@ -76,16 +74,16 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     }
 
     private void buildLobbyStructure(World world) {
-        getLogger().info("Building Central Plaza, Beacon Monument & 4 Portals...");
+        getLogger().info("Building 200x200 Central Plaza & Beacon Monument...");
 
-        // 1. Central Plaza Floor (100x100 from X=-50 to 50, Z=-50 to 50)
-        for (int x = -50; x <= 50; x++) {
-            for (int z = -50; z <= 50; z++) {
+        // 1. Central Plaza Floor (200x200 from X=-100 to 100, Z=-100 to 100)
+        for (int x = -100; x <= 100; x++) {
+            for (int z = -100; z <= 100; z++) {
                 for (int y = 58; y <= 62; y++) {
                     world.getBlockAt(x, y, z).setType(Material.BLACKSTONE, false);
                 }
 
-                if (Math.abs(x) == 50 || Math.abs(z) == 50) {
+                if (Math.abs(x) == 100 || Math.abs(z) == 100) {
                     world.getBlockAt(x, 63, z).setType(Material.POLISHED_BLACKSTONE_BRICK_WALL, false);
                 } else if (x % 10 == 0 || z % 10 == 0) {
                     world.getBlockAt(x, 63, z).setType(Material.ORANGE_CONCRETE, false);
@@ -132,7 +130,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         buildPortalArch(world, -40, 64, 0, Material.GREEN_CONCRETE, Material.LIME_STAINED_GLASS);
         buildPortalArch(world, 40, 64, 0, Material.RED_CONCRETE, Material.RED_STAINED_GLASS);
 
-        getLogger().info("Central Plaza structure built successfully!");
+        getLogger().info("200x200 Central Plaza structure built successfully!");
     }
 
     private void buildPortalArch(World world, int cx, int cy, int cz, Material frame, Material glass) {
@@ -154,11 +152,10 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (spawnLocation != null && player.isOnline()) {
-                player.teleport(spawnLocation);
-            }
-        }, 1L);
+        // Guaranteed Triple Teleport to Central Spawn (0.5, 65.0, 0.5)
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 1L);
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 5L);
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 15L);
 
         setupPlayerLobbyState(player);
 
@@ -173,6 +170,12 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.sendMessage("§6§m--------------------------------------------------");
     }
 
+    private void teleportToCenter(Player player) {
+        if (spawnLocation != null && player.isOnline()) {
+            player.teleport(spawnLocation);
+        }
+    }
+
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         if (spawnLocation != null) {
@@ -184,6 +187,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
         setupPlayerLobbyState(event.getPlayer());
+        teleportToCenter(event.getPlayer());
     }
 
     private void setupPlayerLobbyState(Player player) {
@@ -198,11 +202,12 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getTo().getY() >= 50) return;
-
         Player player = event.getPlayer();
-        if (spawnLocation != null) {
-            player.teleport(spawnLocation);
+        Location loc = player.getLocation();
+        
+        // Perimeter guard: If player strays outside X/Z = +-95 or falls below Y = 50, teleport back to center
+        if (Math.abs(loc.getX()) > 95 || Math.abs(loc.getZ()) > 95 || loc.getY() < 50) {
+            teleportToCenter(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
         }
     }

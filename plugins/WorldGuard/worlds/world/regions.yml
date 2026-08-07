@@ -1,0 +1,23 @@
+# TeenFounders Build Network - WorldGuard Region Protection
+# Protects spawn area from unauthorized placing, breaking, or PvP
+
+regions:
+    spawn:
+        min: {x: -100, y: -64, z: -100}
+        max: {x: 100, y: 320, z: 100}
+        members: {}
+        owners: {}
+        type: cuboid
+        priority: 10
+        flags:
+            passthrough: deny
+            build: deny
+            pvp: deny
+            mob-spawning: deny
+            fire-spread: deny
+            lighter: deny
+            chest-access: deny
+            use: allow
+            interact: allow
+            greeting: '§7[&6TeenFounders§7] Entering Main Network Spawn.'
+            farewell: '§7[&6TeenFounders§7] Leaving Spawn Region.'

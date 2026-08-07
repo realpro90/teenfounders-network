@@ -1,0 +1,44 @@
+# TeenFounders Build Network - Paper Global Configurations (Paper 1.21.11)
+# Optimized for low latency, fast logins, async chunk loading, and stability on Railway
+
+_version: 30
+
+async-chunks:
+  threads: 4
+
+chunk-loading:
+  global-max-chunk-send-per-tick: 10
+  player-max-concurrent-loads: 10
+  player-max-chunk-load-queue-size: 80
+  target-background-threads: 2
+
+item-validation:
+  display-name: 8192
+  loc-name: 8192
+  lore-line: 8192
+
+logging:
+  deobfuscate-stacktraces: true
+  log-player-ip-addresses: true
+
+messages:
+  kick:
+    authentication-servers-down: "§c[TeenFounders] Minecraft authentication servers are down. Please try again later!"
+    connection-throttle: "§c[TeenFounders] Connection throttled. Please wait a few seconds before reconnecting."
+
+packet-limiter:
+  kick-message: "§c[TeenFounders] Sent too many packets! Connection closed for security."
+  limits:
+    all:
+      interval: 7.0
+      max-packet-rate: 500.0
+
+proxies:
+  bungeecord:
+    online-mode: true
+  velocity:
+    enabled: false
+
+watchdog:
+  early-warning-delay: 10000
+  early-warning-every: 5000

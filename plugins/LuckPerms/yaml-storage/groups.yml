@@ -1,0 +1,120 @@
+# TeenFounders Build Network - LuckPerms Groups Configuration
+# Ranks: Owner, Admin, Developer, Architect, Builder, VIP, Member, Guest
+
+owner:
+  permissions:
+  - '*'
+  meta:
+    prefix: '&6&l[OWNER] '
+    weight: '100'
+
+admin:
+  permissions:
+  - essentials.*
+  - worldguard.*
+  - worldedit.*
+  - fawe.*
+  - coreprotect.*
+  - citizens.*
+  - deluxemenus.*
+  - tab.*
+  - luckperms.group.admin
+  - luckperms.group.developer
+  - luckperms.group.architect
+  - luckperms.group.builder
+  - luckperms.group.vip
+  - luckperms.group.member
+  - luckperms.group.guest
+  meta:
+    prefix: '&c&l[ADMIN] '
+    weight: '90'
+
+developer:
+  permissions:
+  - essentials.*
+  - spark.*
+  - paper.*
+  - deluxemenus.*
+  - tab.*
+  - placeholderapi.*
+  - luckperms.user.info
+  meta:
+    prefix: '&3&l[DEV] '
+    weight: '85'
+
+architect:
+  permissions:
+  - essentials.fly
+  - essentials.speed
+  - essentials.gamemode.creative
+  - essentials.time
+  - essentials.weather
+  - worldedit.*
+  - fawe.admin
+  - fawe.limit.large
+  - essentials.sethome.multiple.architect
+  - deluxemenus.menu.*
+  meta:
+    prefix: '&5&l[ARCHITECT] '
+    weight: '70'
+
+builder:
+  permissions:
+  - essentials.fly
+  - essentials.speed
+  - essentials.gamemode.creative
+  - worldedit.selection.*
+  - worldedit.region.*
+  - worldedit.generation.*
+  - fawe.limit.medium
+  - essentials.sethome.multiple.builder
+  - deluxemenus.menu.*
+  meta:
+    prefix: '&d&l[BUILDER] '
+    weight: '50'
+
+vip:
+  permissions:
+  - essentials.fly
+  - essentials.speed
+  - essentials.hat
+  - essentials.sethome.multiple.vip
+  - deluxemenus.menu.*
+  meta:
+    prefix: '&e&l[VIP] '
+    weight: '30'
+
+member:
+  permissions:
+  - essentials.build
+  - essentials.spawn
+  - essentials.warp
+  - essentials.warp.list
+  - essentials.home
+  - essentials.sethome
+  - essentials.delhome
+  - essentials.sethome.multiple.member
+  - essentials.tpa
+  - essentials.tpaccept
+  - essentials.tpdeny
+  - essentials.msg
+  - essentials.pay
+  - deluxemenus.menu.*
+  meta:
+    prefix: '&a[MEMBER] '
+    weight: '10'
+
+guest:
+  permissions:
+  - essentials.spawn
+  - essentials.motd
+  - essentials.rules
+  - essentials.help
+  - essentials.home
+  - essentials.sethome
+  - deluxemenus.menu.help
+  - deluxemenus.menu.rules
+  - deluxemenus.menu.server_selector
+  meta:
+    prefix: '&7[GUEST] '
+    weight: '0'

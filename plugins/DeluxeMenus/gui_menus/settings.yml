@@ -1,0 +1,53 @@
+# TeenFounders Build Network - Player Settings GUI
+menu_title: '§6§lTEENFOUNDERS §8| Preferences & Settings'
+open_command:
+  - settings
+  - prefs
+size: 27
+
+items:
+  'filler':
+    material: BLACK_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26]
+    display_name: ' '
+
+  'toggle_fly':
+    material: FEATHER
+    slot: 11
+    display_name: '§6§lToggle Flight'
+    lore:
+      - '§7Enable or disable flight mode.'
+      - ''
+      - '§fClick to toggle!'
+    left_click_commands:
+      - '[player] fly'
+
+  'toggle_nightvision':
+    material: GOLDEN_CARROT
+    slot: 13
+    display_name: '§e§lToggle Fullbright'
+    lore:
+      - '§7Enable infinite vision light.'
+      - ''
+      - '§fClick to toggle!'
+    left_click_commands:
+      - '[player] effect give %player_name% minecraft:night_vision infinite 1 true'
+
+  'reset_speed':
+    material: LEATHER_BOOTS
+    slot: 15
+    display_name: '§a§lReset Walk & Fly Speed'
+    lore:
+      - '§7Reset movement speed to standard 1.0.'
+      - ''
+      - '§fClick to reset!'
+    left_click_commands:
+      - '[player] speed fly 1'
+      - '[player] speed walk 1'
+
+  'close':
+    material: BARRIER
+    slot: 22
+    display_name: '§c§lClose'
+    left_click_commands:
+      - '[close]'

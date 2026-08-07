@@ -1,0 +1,12 @@
+_version: 30
+
+async-chunks:
+  threads: 4
+
+proxies:
+  bungeecord:
+    online-mode: false
+  velocity:
+    enabled: true
+    online-mode: true
+    secret: "TeenFoundersNetworkVelocityModernForwardingSecretKey2026Secure"

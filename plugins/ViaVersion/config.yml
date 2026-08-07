@@ -1,0 +1,7 @@
+# TeenFounders Build Network - ViaVersion Configuration
+# Protocol backwards/forwards compatibility
+
+check-for-updates: false
+send-supported-versions: true
+block-protocols: []
+suppress-conversion-warnings: true

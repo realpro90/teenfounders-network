@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  # 1. Velocity Proxy Entrypoint
+  proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: tf-proxy
+    restart: always
+    ports:
+      - "25565:25565/tcp"
+    depends_on:
+      - lobby
+    networks:
+      - tf-network
+
+  # 2. Lobby Hub Server
+  lobby:
+    build:
+      context: .
+      dockerfile: lobby/Dockerfile
+    container_name: tf-lobby
+    restart: always
+    environment:
+      - JAVA_MEMORY=3G
+      - SERVER_NAME=lobby
+    volumes:
+      - lobby_data:/data
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tf-network
+
+  # 3. Creative Plot World Server
+  creative:
+    build:
+      context: .
+      dockerfile: creative/Dockerfile
+    container_name: tf-creative
+    restart: always
+    environment:
+      - JAVA_MEMORY=4G
+      - SERVER_NAME=creative
+    volumes:
+      - creative_data:/data
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tf-network
+
+  # 4. Build Competition Arena Server
+  competition:
+    build:
+      context: .
+      dockerfile: competition/Dockerfile
+    container_name: tf-competition
+    restart: always
+    environment:
+      - JAVA_MEMORY=3G
+      - SERVER_NAME=competition
+    volumes:
+      - competition_data:/data
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tf-network
+
+  # 5. 15-Day Survival Event Server
+  survival-event:
+    build:
+      context: .
+      dockerfile: survival-event/Dockerfile
+    container_name: tf-survival-event
+    restart: always
+    environment:
+      - JAVA_MEMORY=3G
+      - SERVER_NAME=survival-event
+    volumes:
+      - survival_data:/data
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tf-network
+
+  # 6. PvP Arena Server
+  pvp:
+    build:
+      context: .
+      dockerfile: pvp/Dockerfile
+    container_name: tf-pvp
+    restart: always
+    environment:
+      - JAVA_MEMORY=3G
+      - SERVER_NAME=pvp
+    volumes:
+      - pvp_data:/data
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tf-network
+
+  # 7. PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: tf-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: teenfounders_mc
+      POSTGRES_USER: tf_admin
+      POSTGRES_PASSWORD: TeenFoundersSecretPassword2026!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - tf-network
+
+  # 8. Redis Cache & Pub/Sub Messaging Service
+  redis:
+    image: redis:7-alpine
+    container_name: tf-redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel notice
+    volumes:
+      - redis_data:/data
+    networks:
+      - tf-network
+
+networks:
+  tf-network:
+    driver: bridge
+
+volumes:
+  lobby_data:
+  creative_data:
+  competition_data:
+  survival_data:
+  pvp_data:
+  postgres_data:
+  redis_data:

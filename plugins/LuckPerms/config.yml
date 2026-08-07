@@ -1,0 +1,27 @@
+# TeenFounders Build Network - LuckPerms Configuration
+# Branding: TeenFounders Orange (#FF9932), White, Black
+
+server: global
+storage-method: YAML
+split-storage:
+  enabled: false
+
+group-weight-nodes-enabled: true
+apply-user-config-permissions: true
+apply-wildcards: true
+
+vault-formatting:
+  vault-group-use-weight: true
+
+messaging-service: none
+
+meta-formatting:
+  prefix:
+    format:
+      - "highest"
+  suffix:
+    format:
+      - "highest"
+
+inheritance-formatting:
+  duplicates: drop

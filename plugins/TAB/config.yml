@@ -1,0 +1,78 @@
+# TeenFounders Build Network - TAB Configuration
+# Custom Tablist, Scoreboard & Nametags using TeenFounders branding
+# Primary Colors: Orange (#FF9932), White (#FFFFFF), Dark Gray (#262626)
+
+header-footer:
+  enabled: true
+  header:
+    - ""
+    - "§6§lTEENFOUNDERS BUILD NETWORK"
+    - "§f§lBUILD. INNOVATE. SCALE."
+    - "§7https://teenfounders.in"
+    - ""
+  footer:
+    - ""
+    - "§7Players Online: §e%online% §7/ §e%max_players%  §7|  Ping: §a%ping%ms  §7|  TPS: §a%tps%"
+    - "§6Use §e/menu §6or §e/help §6for navigation & builder tools"
+    - ""
+  change-interval: 1000
+
+tablist-name-formatting:
+  enabled: true
+  align-tabsuffices: false
+
+scoreboard:
+  enabled: true
+  toggle-command: /sb
+  remember-toggle-choice: true
+  use-numbers: false
+  title: "§6§lTEENFOUNDERS"
+  lines:
+    - "§7§m------------------------"
+    - "§fPlayer: §e%player_name%"
+    - "§fRank: %luckperms_prefix%"
+    - ""
+    - "§6§lNETWORK INFO"
+    - "§fOnline: §a%online%§7/§a%max_players%"
+    - "§fTPS: §a%tps%"
+    - "§fPing: §a%ping%ms"
+    - ""
+    - "§6§lBUILDER TOOLS"
+    - "§fPlot World: §e/warp plots"
+    - "§fMenu: §e/menu"
+    - "§7§m------------------------"
+    - "§eplay.teenfounders.in"
+
+nametags:
+  enabled: true
+  anti-override: true
+
+placeholders:
+  date-format: "dd.MM.yyyy"
+  time-format: "HH:mm:ss"
+
+assign-groups:
+  owner:
+    tabprefix: "&6&lOWNER &f"
+    tagprefix: "&6&l[OWNER] &f"
+  admin:
+    tabprefix: "&c&lADMIN &f"
+    tagprefix: "&c&l[ADMIN] &f"
+  developer:
+    tabprefix: "&3&lDEV &f"
+    tagprefix: "&3&l[DEV] &f"
+  architect:
+    tabprefix: "&5&lARCHITECT &f"
+    tagprefix: "&5&l[ARCHITECT] &f"
+  builder:
+    tabprefix: "&d&lBUILDER &f"
+    tagprefix: "&d&l[BUILDER] &f"
+  vip:
+    tabprefix: "&e&lVIP &f"
+    tagprefix: "&e&l[VIP] &f"
+  member:
+    tabprefix: "&aMEMBER &f"
+    tagprefix: "&a[MEMBER] &f"
+  guest:
+    tabprefix: "&7GUEST &f"
+    tagprefix: "&7[GUEST] &f"

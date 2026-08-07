@@ -1,0 +1,52 @@
+# ==============================================================================
+# TeenFounders Network - Velocity Proxy Configuration
+# Official Proxy Routing & Modern Forwarding Definition
+# ==============================================================================
+
+config-version = "2.7"
+bind = "0.0.0.0:25565"
+motd = "<gradient:#FF9932:#FFD175><bold>TEENFOUNDERS NETWORK</bold></gradient> <gray>[1.21.11]</gray>\n<yellow>Creative Plots <gray>|</gray> Build Offs <gray>|</gray> Survival Seasons <gray>|</gray> PvP</yellow>"
+show-max-players = 100
+online-mode = true
+prevent-client-proxy-connections = false
+player-info-forwarding-mode = "modern"
+forwarding-secret-file = "forwarding.secret"
+announce-forge = false
+kick-existing-players = false
+
+[servers]
+lobby = "lobby:25565"
+creative = "creative:25565"
+competition = "competition:25565"
+survival-event = "survival-event:25565"
+pvp = "pvp:25565"
+
+try = [
+  "lobby"
+]
+
+[forced-hosts]
+
+[advanced]
+compression-threshold = 256
+compression-level = -1
+login-ratelimit = 3000
+connection-timeout = 5000
+read-timeout = 30000
+haproxy-protocol = false
+tcp-fast-open = true
+bungee-plugin-message-channel = true
+show-ping-requests = false
+failover-on-unexpected-server-disconnect = true
+declare-commands = true
+log-command-executions = true
+log-direct-connections = true
+
+[query]
+enabled = true
+port = 25565
+map = "Velocity"
+show-plugins = false
+
+[metrics]
+enabled = true

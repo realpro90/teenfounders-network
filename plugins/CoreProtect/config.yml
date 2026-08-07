@@ -1,0 +1,23 @@
+# TeenFounders Build Network - CoreProtect Audit Logging Config
+# SQLite backed block/command logging for anti-griefing & rollbacks
+
+use-mysql: false
+table-prefix: co_
+
+verbose: true
+rollback-items: true
+rollback-entities: true
+
+check-updates: false
+api-enabled: true
+
+# Logging Targets
+log-block-changes: true
+log-worldedit: true
+log-container-transactions: true
+log-player-kills: false
+log-chat: true
+log-commands: true
+log-join-leave: true
+
+auto-purge: 30

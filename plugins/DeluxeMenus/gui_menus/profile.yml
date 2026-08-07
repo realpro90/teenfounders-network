@@ -1,0 +1,53 @@
+# TeenFounders Build Network - Player Profile GUI
+menu_title: '§6§lTEENFOUNDERS §8| Player Profile'
+open_command:
+  - profile
+  - stats
+size: 27
+
+items:
+  'filler':
+    material: BLACK_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26]
+    display_name: ' '
+
+  'player_head':
+    material: PLAYER_HEAD
+    slot: 11
+    display_name: '§6§l%player_name%''s Profile'
+    lore:
+      - '§7Rank: %luckperms_prefix%'
+      - '§7Ping: §a%ping%ms'
+      - '§7Homes Set: §e%essentials_homes%'
+      - ''
+      - '§eTeenFounders Builder ID: §f#%player_uuid%'
+    left_click_commands: []
+
+  'plots_info':
+    material: EMERALD
+    slot: 13
+    display_name: '§a§lMy Creative Plots'
+    lore:
+      - '§7Manage your owned plots and trusted members.'
+      - ''
+      - '§fClick to view plot options!'
+    left_click_commands:
+      - '[player] plot list'
+
+  'settings_link':
+    material: REDSTONE_TORCH
+    slot: 15
+    display_name: '§b§lPlayer Preferences'
+    lore:
+      - '§7Toggle speed, flight, night vision, and chat settings.'
+      - ''
+      - '§fClick to open Settings!'
+    left_click_commands:
+      - '[player] settings'
+
+  'close':
+    material: BARRIER
+    slot: 22
+    display_name: '§c§lClose'
+    left_click_commands:
+      - '[close]'

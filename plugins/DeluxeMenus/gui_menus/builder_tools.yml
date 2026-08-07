@@ -1,0 +1,88 @@
+# TeenFounders Build Network - Builder Tools GUI
+menu_title: '§6§lTEENFOUNDERS §8| Builder Toolkit'
+open_command:
+  - build
+  - buildtools
+  - btools
+size: 36
+
+items:
+  'filler':
+    material: BLACK_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,26,27,28,29,30,31,32,33,34,35]
+    display_name: ' '
+
+  'wand':
+    material: WOODEN_AXE
+    slot: 10
+    display_name: '§6§lWorldEdit Wand'
+    lore:
+      - '§7Get the standard selection wand.'
+      - '§7Left click: Position 1'
+      - '§7Right click: Position 2'
+      - ''
+      - '§fClick to receive Wand!'
+    left_click_commands:
+      - '[player] //wand'
+
+  'navigation_wand':
+    material: COMPASS
+    slot: 11
+    display_name: '§b§lNavigation Compass'
+    lore:
+      - '§7Teleport through walls and across structures.'
+      - ''
+      - '§fClick to receive Navigation Wand!'
+    left_click_commands:
+      - '[player] //navwand'
+
+  'smooth_brush':
+    material: BRICK
+    slot: 13
+    display_name: '§e§lTerrain Smooth Brush'
+    lore:
+      - '§7Equip smooth brush tool.'
+      - ''
+      - '§fClick to activate brush!'
+    left_click_commands:
+      - '[player] //br smooth 3'
+
+  'sphere_brush':
+    material: SLIME_BALL
+    slot: 14
+    display_name: '§a§lSphere Builder Brush'
+    lore:
+      - '§7Equip sphere building brush.'
+      - ''
+      - '§fClick to activate brush!'
+    left_click_commands:
+      - '[player] //br sphere stone 3'
+
+  'time_day':
+    material: CLOCK
+    slot: 16
+    display_name: '§f§lSet Time: Day'
+    lore:
+      - '§7Change client view time to Day.'
+      - ''
+      - '§fClick to set Day!'
+    left_click_commands:
+      - '[player] ptime day'
+
+  'night_vision':
+    material: GOLDEN_CARROT
+    slot: 22
+    display_name: '§d§lToggle Night Vision'
+    lore:
+      - '§7Toggle full bright builder vision.'
+      - ''
+      - '§fClick to toggle!'
+    left_click_commands:
+      - '[player] effect give %player_name% minecraft:night_vision infinite 1 true'
+
+  'close':
+    material: BARRIER
+    slot: 31
+    display_name: '§c§lClose Menu'
+    left_click_commands:
+      - '[close]'

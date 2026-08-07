@@ -1,0 +1,25 @@
+# TeenFounders Build Network - DeluxeMenus Master Configuration
+# Registered Custom GUI Menus
+
+debug: false
+check_updates: false
+
+gui_menus:
+  server_selector:
+    file: gui_menus/server_selector.yml
+  warp_selector:
+    file: gui_menus/warp_selector.yml
+  profile:
+    file: gui_menus/profile.yml
+  builder_tools:
+    file: gui_menus/builder_tools.yml
+  cosmetics:
+    file: gui_menus/cosmetics.yml
+  settings:
+    file: gui_menus/settings.yml
+  help:
+    file: gui_menus/help.yml
+  rules:
+    file: gui_menus/rules.yml
+  championship:
+    file: gui_menus/championship.yml

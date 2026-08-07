@@ -1,0 +1,51 @@
+# TeenFounders Build Network - Network Rules GUI
+menu_title: '§6§lTEENFOUNDERS §8| Community Rules'
+open_command:
+  - rules
+  - guidelines
+size: 27
+
+items:
+  'filler':
+    material: BLACK_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26]
+    display_name: ' '
+
+  'rule_1':
+    material: PAPER
+    slot: 10
+    display_name: '§6§lRule 1: Be Respectful'
+    lore:
+      - '§7Treat all builders, entrepreneurs, and staff'
+      - '§7with kindness. Zero toxicity or hate speech.'
+
+  'rule_2':
+    material: PAPER
+    slot: 12
+    display_name: '§6§lRule 2: No Griefing or Stealing'
+    lore:
+      - '§7Destroying other builders work or stealing'
+      - '§7schematics is strictly forbidden and logged via CoreProtect.'
+
+  'rule_3':
+    material: PAPER
+    slot: 14
+    display_name: '§6§lRule 3: No Lag Machines'
+    lore:
+      - '§7Building intentional lag contraptions or excessive'
+      - '§7redstone clocks will result in plot resets and bans.'
+
+  'rule_4':
+    material: PAPER
+    slot: 16
+    display_name: '§6§lRule 4: Build Appropriately'
+    lore:
+      - '§7Keep builds appropriate for all ages.'
+      - '§7No offensive builds, symbols, or imagery.'
+
+  'accept_rules':
+    material: EMERALD_BLOCK
+    slot: 22
+    display_name: '§a§lI Understand & Accept Rules'
+    left_click_commands:
+      - '[close]'

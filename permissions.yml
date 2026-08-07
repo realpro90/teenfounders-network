@@ -1,0 +1,22 @@
+# TeenFounders Build Network - Default Bukkit Permissions Fallback
+# Primary permissions are managed dynamically via LuckPerms in plugins/LuckPerms/
+
+server.admin:
+  description: Gives access to all administrative commands
+  default: op
+  children:
+    essentials.*: true
+    worldguard.*: true
+    worldedit.*: true
+    coreprotect.*: true
+    luckperms.*: true
+
+server.builder:
+  description: Gives access to creative building and plot commands
+  default: true
+  children:
+    essentials.build: true
+    essentials.fly: true
+    essentials.spawn: true
+    essentials.warp: true
+    essentials.warp.list: true

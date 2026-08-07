@@ -1,0 +1,85 @@
+# TeenFounders Build Network - Spigot Configuration
+# Optimized for Paper 1.21.11 Performance
+
+config-version: 12
+
+messages:
+  whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
+  unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
+  server-full: "§c[TeenFounders] Server is currently full! Consider upgrading to VIP."
+  outdated-client: "§c[TeenFounders] Outdated client! Please connect with Minecraft 1.21.x."
+  outdated-server: "§c[TeenFounders] Outdated server! Please update your client."
+  restart: "§c[TeenFounders] Server is restarting..."
+
+world-settings:
+  default:
+    below-zero-generation-in-existing-chunks: true
+    verbose: false
+    merge-radius:
+      item: 4.0
+      exp: 6.0
+    item-despawn-rate: 3000
+    view-settings:
+      default:
+        view-distance: 8
+        simulation-distance: 6
+    ticks-per:
+      hopper-transfer: 8
+      hopper-check: 8
+    hopper-amount: 1
+    entity-activation-range:
+      animals: 16
+      monsters: 24
+      raiders: 24
+      misc: 8
+      water: 8
+      villagers: 16
+      flying-monsters: 24
+      tick-inactive-villagers: false
+      ignore-spectators: true
+    entity-tracking-range:
+      players: 128
+      animals: 48
+      monsters: 48
+      misc: 32
+      other: 48
+    growth:
+      cactus-modifier: 100
+      cane-modifier: 100
+      melon-modifier: 100
+      mushroom-modifier: 100
+      pumpkin-modifier: 100
+      sapling-modifier: 100
+      beetroot-modifier: 100
+      carrot-modifier: 100
+      potato-modifier: 100
+      wheat-modifier: 100
+      netherwart-modifier: 100
+      vine-modifier: 100
+      cocoa-modifier: 100
+      bamboo-modifier: 100
+      sweetberry-modifier: 100
+      kelp-modifier: 100
+    max-tick-time:
+      tile: 50
+      entity: 50
+    squid-spawn-range:
+      min: 45.0
+
+players:
+  disable-saving: false
+
+commands:
+  replace-commands:
+  - setblock
+  - summon
+  - testforblock
+  - tellraw
+  log: true
+  tab-complete: 0
+  send-namespaced: false
+
+advancements:
+  disable-saving: false
+  disabled:
+  - root

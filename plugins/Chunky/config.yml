@@ -1,0 +1,19 @@
+# TeenFounders Build Network - Chunky World Pre-Generator Config
+# Pre-generates world chunks for lag-free exploration
+
+version: 1.4.28
+language: en
+
+task:
+  world: world
+  shape: square
+  center:
+    x: 0
+    z: 0
+  radius: 2500
+  pattern: concentric
+  quiet: false
+
+performance:
+  chunk-threads: 2
+  update-interval: 5

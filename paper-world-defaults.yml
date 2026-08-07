@@ -1,0 +1,78 @@
+# TeenFounders Build Network - Paper World Defaults Configuration
+# Optimized for PaperMC 1.21.11 Creative Building Environment
+
+_version: 30
+
+anticheat:
+  obfuscation:
+    items:
+      hide-itemmeta: false
+      hide-durability: false
+
+antixray:
+  enabled: false
+
+chunks:
+  auto-save-interval: 6000
+  delay-chunk-unloads-by: 10s
+  entity-per-chunk-save-limit:
+    experience_orb: -1
+    item: 30
+    firework_rocket: 10
+  max-auto-save-chunks-per-tick: 8
+  prevent-moving-into-unloaded-chunks: true
+
+collisions:
+  allow-player-clipping: false
+  only-players-collide: false
+
+entities:
+  armor-stands:
+    do-collision-entity-lookups: false
+    tick: false
+  behavior:
+    disable-chest-cat-detection: true
+    disable-player-crumbs-tracking: true
+  spawning:
+    alt-item-despawn-rate:
+      enabled: true
+      items:
+        cobblestone: 300
+        dirt: 300
+        netherrack: 300
+    despawn-ranges:
+      ambient:
+        hard: 64
+        soft: 32
+      creature:
+        hard: 64
+        soft: 32
+      monster:
+        hard: 64
+        soft: 32
+    per-player-mob-spawns: true
+  tracking-range-mixin:
+    animals: 48
+    display: 128
+    misc: 32
+    monsters: 48
+    other: 48
+    players: 128
+
+environment:
+  optimize-explosions: true
+
+fix-climbing-bypass: true
+
+hopper:
+  cooldown-when-full: 5
+  disable-move-event: true
+  ignore-occluding-blocks: true
+
+tick-rates:
+  behavior:
+    villager:
+      validatenearbypoi: 60
+  sensor:
+    villager:
+      secondarypoisensor: 80

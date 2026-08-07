@@ -1,0 +1,9 @@
+# TeenFounders Build Network - DiscordSRV Configuration Template
+# Bridge Minecraft chat and server events with Discord community
+
+ConfigVersion: 1.29.0
+BotToken: "DISCORD_BOT_TOKEN_HERE"
+Channels: {"global": "000000000000000000"}
+
+DiscordToMinecraftChatMessageFormat: "[%toprolecolor%%toprole%&f] %fullname% » %message%"
+MinecraftToDiscordChatMessageFormat: "%displayname% » %message%"

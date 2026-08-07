@@ -1,0 +1,59 @@
+# TeenFounders Build Network - EssentialsX Configuration
+# Branding & Theme: TeenFounders Orange (#FF9932), White, Black
+
+ops-name-color: '6'
+nickname-prefix: '~'
+max-nick-length: 15
+
+change-displayname: true
+teleport-cooldown: 0
+teleport-delay: 0
+teleport-invulnerability: 4
+
+auto-afk: 300
+auto-afk-kick: -1
+freeze-afk-players: false
+
+sethome-multiple:
+  default: 1
+  guest: 1
+  member: 5
+  vip: 10
+  builder: 15
+  architect: 25
+  developer: 50
+  admin: 100
+  owner: 100
+
+starting-balance: 1000
+currency-symbol: '$'
+max-money: 100000000000000
+
+spawn-on-join: true
+respawn-at-home: true
+
+chat:
+  radius: 0
+  format: '{DISPLAYNAME}&7: &f{MESSAGE}'
+  group-formats:
+    owner: '&6&l[OWNER] {DISPLAYNAME}&7: &f{MESSAGE}'
+    admin: '&c&l[ADMIN] {DISPLAYNAME}&7: &f{MESSAGE}'
+    developer: '&3&l[DEV] {DISPLAYNAME}&7: &f{MESSAGE}'
+    architect: '&5&l[ARCHITECT] {DISPLAYNAME}&7: &f{MESSAGE}'
+    builder: '&d&l[BUILDER] {DISPLAYNAME}&7: &f{MESSAGE}'
+    vip: '&e&l[VIP] {DISPLAYNAME}&7: &f{MESSAGE}'
+    member: '&a[MEMBER] {DISPLAYNAME}&7: &f{MESSAGE}'
+    guest: '&7[GUEST] {DISPLAYNAME}&7: &f{MESSAGE}'
+
+protect:
+  prevent:
+    lava-flow: true
+    water-flow: false
+    tnt-explosion: true
+    creeper-explosion: true
+    fire-spread: true
+    flint-fire: true
+    lightning-fire-spread: true
+
+custom-join-message: "&7[&a+&7] &6TeenFounders &7| &f{PLAYER} joined the build network."
+custom-quit-message: "&7[&c-&7] &6TeenFounders &7| &f{PLAYER} left the network."

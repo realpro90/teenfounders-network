@@ -1,0 +1,15 @@
+&6&l==================================================
+&6&l    TEENFOUNDERS BUILD NETWORK - WELCOME!
+&f    The premier creative build platform for teen founders
+&7    Website: https://teenfounders.in
+&6&l==================================================
+&f  Hello &e{PLAYER}&f! Welcome to the network.
+&f  Your Rank: {GROUP}
+&f  Online Players: &a{ONLINE}&f / &a{MAXPLAYERS}
+&6&l--------------------------------------------------
+&e  Quick Commands:
+&f  • &6/menu &f- Open master GUI network navigator
+&f  • &6/warp plots &f- Teleport to creative plot worlds
+&f  • &6/build &f- Open builder tools menu
+&f  • &6/rules &f- View community guidelines
+&6&l==================================================

@@ -1,0 +1,54 @@
+# TeenFounders Build Network - Cosmetics GUI
+menu_title: '§6§lTEENFOUNDERS §8| Cosmetics'
+open_command:
+  - cosmetics
+  - hats
+size: 27
+
+items:
+  'filler':
+    material: BLACK_STAINED_GLASS_PANE
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,19,20,21,22,23,24,25,26]
+    display_name: ' '
+
+  'crown_hat':
+    material: GOLDEN_HELMET
+    slot: 11
+    display_name: '§6§lFounder Golden Crown'
+    lore:
+      - '§7Wear item in your hand on your head!'
+      - ''
+      - '§fClick to wear current item as hat!'
+    left_click_commands:
+      - '[player] hat'
+
+  'fly_speed':
+    material: FEATHER
+    slot: 13
+    display_name: '§e§lFlight Speed Boost'
+    lore:
+      - '§7Set flight speed for fast building.'
+      - '§7Speed 1: Normal'
+      - '§7Speed 3: Fast'
+      - ''
+      - '§fClick to set Speed 3!'
+    left_click_commands:
+      - '[player] speed fly 3'
+
+  'clear_hat':
+    material: GLASS
+    slot: 15
+    display_name: '§c§lRemove Hat'
+    lore:
+      - '§7Clear cosmetic helmet.'
+      - ''
+      - '§fClick to remove!'
+    left_click_commands:
+      - '[player] hat air'
+
+  'close':
+    material: BARRIER
+    slot: 22
+    display_name: '§c§lClose'
+    left_click_commands:
+      - '[close]'

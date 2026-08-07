@@ -1,0 +1,9 @@
+# TeenFounders Build Network - EssentialsSpawn Point Configuration
+spawns:
+  default:
+    world: world
+    x: 0.5
+    y: 65.0
+    z: 0.5
+    yaw: 0.0
+    pitch: -5.0

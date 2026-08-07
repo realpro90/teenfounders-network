@@ -514,8 +514,8 @@ _configure_server_properties() {
     _set_property "enable-command-block" "true"                 "${props_file}"
     _set_property "motd"                 "\\u00A76\\u00A7lTEENFOUNDERS \\u00A7fLobby \\u00A77[${MINECRAFT_VERSION}]" "${props_file}"
 
-    # Flat world type — only set for fresh lobby generation
-    _set_property "level-type"           "minecraft\\:flat"     "${props_file}"
+    # Flat world type — force flat terrain for lobby
+    _set_property "level-type"           "flat"                 "${props_file}"
     _set_property "generator-settings"   "${FLAT_GENERATOR}"    "${props_file}"
 
     _ok "Configured server.properties ($(grep -c '=' "${props_file}" 2>/dev/null || echo 0) properties)"

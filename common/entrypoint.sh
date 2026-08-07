@@ -152,11 +152,11 @@ messages:
   whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
   unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
   server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
-  outdated-client: "§c[TeenFounders] Outdated client! Please use Minecraft Java Edition 1.21.11."
-  outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.4 with ViaVersion."
+  outdated-client: "§c[TeenFounders] Welcome to TeenFounders Network!"
+  outdated-server: "§c[TeenFounders] Welcome to TeenFounders Network!"
 SPIGOT_EOF
 fi
-echo -e "  ${C_GREEN}✓${C_RESET} BungeeCord forwarding enabled (spigot.yml)"
+echo -e "  ${C_GREEN}✓${C_RESET} Spigot configuration initialized"
 
 # ─── Step 8: Paper-global.yml — proxy forwarding mode ───────────────────────
 

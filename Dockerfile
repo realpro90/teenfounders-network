@@ -36,10 +36,11 @@ COPY lobby/           /server/lobby/
 COPY plugins/         /server/plugins/
 COPY config_templates/ /server/config_templates/
 
-# ─── Permissions ─────────────────────────────────────────────────────────────
+# ─── Permissions & Pre-Cache Plugins ──────────────────────────────────────────
 RUN chmod +x /server/entrypoint.sh \
     && chmod +x /server/scripts/*.sh 2>/dev/null || true \
-    && chmod +x /server/lobby/*.sh 2>/dev/null || true
+    && chmod +x /server/lobby/*.sh 2>/dev/null || true \
+    && /bin/bash /server/scripts/download-plugins.sh /server/plugins
 
 # ─── Ports ───────────────────────────────────────────────────────────────────
 EXPOSE 25565/tcp

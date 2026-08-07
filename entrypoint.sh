@@ -73,7 +73,11 @@ fi
 
 if [[ -d "/server/plugins" ]]; then
     cp -rf /server/plugins/* "${DATA_DIR}/plugins/" 2>/dev/null || true
-    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced"
+    if [[ -f "/server/plugins/TAB/config.yml" ]]; then
+        mkdir -p "${DATA_DIR}/plugins/TAB"
+        cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
+    fi
+    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced & TAB HUD branded"
 fi
 
 if [[ -d "/server/config_templates" ]]; then
@@ -82,7 +86,7 @@ fi
 
 # ─── Step 5: Download & Validate Server Engine ──────────────────────────────
 
-JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar" 
+JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
 if [[ ! -f "${JAR_FILE}" ]]; then
@@ -104,6 +108,10 @@ fi
 # ─── Step 6: Provision Lobby World (lobby server only) ───────────────────────
 
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
+    if [[ ! -d "${DATA_DIR}/world/datapacks/tf_lobby" ]]; then
+        export TF_FORCE_REINSTALL=1
+    fi
+
     if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
         echo ""
         /bin/bash /server/lobby/setup_lobby_world.sh "${DATA_DIR}"
@@ -143,7 +151,6 @@ echo -e "  ${C_GREEN}✓${C_RESET} BungeeCord forwarding enabled (spigot.yml)"
 mkdir -p "${DATA_DIR}/config"
 
 if [[ -f "${DATA_DIR}/config/paper-global.yml" ]]; then
-    # In-place edit: set online-mode to false under bungeecord
     if grep -q "online-mode:" "${DATA_DIR}/config/paper-global.yml"; then
         sed -i 's/online-mode:.*/online-mode: false/' "${DATA_DIR}/config/paper-global.yml"
     fi
@@ -183,7 +190,6 @@ fi
 
 JVM_FLAGS=(
     # Railway dual-stack: listen on IPv6 for proxy, but use IPv4 for outbound downloads
-    # DO NOT set preferIPv6Addresses=true — it breaks Mojang/Modrinth CDN downloads
     "-Djava.net.preferIPv4Stack=false"
     # Memory
     "-Xms${MEMORY}"

@@ -46,18 +46,13 @@ download_plugin "Vault" "https://github.com/MilkBowl/Vault/releases/download/1.7
 download_plugin "LuckPerms" "https://cdn.modrinth.com/data/Vebnzrzj/versions/b0mk8uS6/LuckPerms-Bukkit-5.5.71.jar" 1000000
 
 # 2. Essentials Suite
-download_plugin "EssentialsX" "https://cdn.modrinth.com/data/hXiIvTyT/versions/nY6VN1XH/EssentialsX-2.22.0.jar" 3000000
-download_plugin "EssentialsXSpawn" "https://cdn.modrinth.com/data/hXiIvTyT/versions/nY6VN1XH/EssentialsXSpawn-2.22.0.jar" 15000
+download_plugin "EssentialsX" "https://github.com/EssentialsX/Essentials/releases/download/2.20.1/EssentialsX-2.20.1.jar" 3000000
+download_plugin "EssentialsXSpawn" "https://github.com/EssentialsX/Essentials/releases/download/2.20.1/EssentialsXSpawn-2.20.1.jar" 15000
 
-# 3. World Management & Editing
-download_plugin "FastAsyncWorldEdit" "https://cdn.modrinth.com/data/z4HZZnLr/versions/wDzcK7Sn/FastAsyncWorldEdit-Bukkit-2.15.3.jar" 10000000
-download_plugin "WorldGuard" "https://cdn.modrinth.com/data/DKY9btbd/versions/btHBavWa/worldguard-bukkit-7.0.18.jar" 1000000
-download_plugin "Chunky" "https://cdn.modrinth.com/data/fALzjamp/versions/MdY6JATr/Chunky-Bukkit-1.5.3.jar" 500000
-
-# 4. User Interfaces & Protocol Compatibility
+# 3. User Interfaces & Protocol Compatibility
 download_plugin "PlaceholderAPI" "https://cdn.modrinth.com/data/lKEzGugV/versions/pIvQcXW8/PlaceholderAPI-2.12.3.jar" 300000
-download_plugin "ViaVersion" "https://cdn.modrinth.com/data/P1OZGk5p/versions/N1tHqKId/ViaVersion-5.12.0-SNAPSHOT.jar" 3000000
-download_plugin "ViaBackwards" "https://cdn.modrinth.com/data/NpvuJQoq/versions/D2klj0m6/ViaBackwards-5.12.0-SNAPSHOT.jar" 3000000
+download_plugin "ViaVersion" "https://github.com/ViaVersion/ViaVersion/releases/download/5.2.1/ViaVersion-5.2.1.jar" 3000000
+download_plugin "ViaBackwards" "https://github.com/ViaVersion/ViaBackwards/releases/download/5.2.1/ViaBackwards-5.2.1.jar" 1000000
 download_plugin "TAB" "https://github.com/NEZNAMY/TAB/releases/download/5.0.4/TAB.v5.0.4.jar" 1000000
 download_plugin "DeluxeMenus" "https://cdn.modrinth.com/data/kKZkPgJ7/versions/PNKQ6RMs/DeluxeMenus-1.14.1-Release.jar" 500000
 

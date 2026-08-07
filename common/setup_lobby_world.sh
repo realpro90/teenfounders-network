@@ -503,7 +503,7 @@ _configure_server_properties() {
     _set_property "simulation-distance"  "8"                    "${props_file}"
     _set_property "online-mode"          "false"                "${props_file}"
     _set_property "server-port"          "25565"                "${props_file}"
-    _set_property "server-ip"            "0.0.0.0"              "${props_file}"
+    _set_property "server-ip"            ""                     "${props_file}"
     _set_property "gamemode"             "adventure"            "${props_file}"
     _set_property "force-gamemode"       "true"                 "${props_file}"
     _set_property "pvp"                  "false"                "${props_file}"
@@ -680,7 +680,26 @@ _install_lobby() {
     _section "Configuring Spawn Point"
     _configure_spawn
 
-    # ── Step 7: Validate world ───────────────────────────────────────────
+    # ── Step 7: Deploy Lobby Datapack ──────────────────────────────────
+    _section "Deploying Lobby Datapack"
+
+    local datapack_src="/server/lobby/datapacks/tf_lobby"
+    local datapack_dest="${WORLD_DIR}/datapacks/tf_lobby"
+
+    if [[ -d "${datapack_src}" ]]; then
+        mkdir -p "${WORLD_DIR}/datapacks"
+        cp -rf "${datapack_src}" "${datapack_dest}"
+        local dp_files
+        dp_files=$(_file_count "${datapack_dest}")
+        _ok "Deployed tf_lobby datapack (${dp_files} files)"
+        _detail "Plaza builder, portal districts, join handler, decorations"
+        _log "INFO" "Datapack deployed: ${datapack_dest} (${dp_files} files)"
+    else
+        _warn "Datapack source not found: ${datapack_src}"
+        _info "Lobby structures will not be auto-generated"
+    fi
+
+    # ── Step 8: Validate world ───────────────────────────────────────────
     _section "Final Validation"
 
     if ! _validate_world "${WORLD_DIR}"; then

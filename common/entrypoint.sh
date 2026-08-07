@@ -82,7 +82,7 @@ fi
 
 # ─── Step 5: Download & Validate Server Engine ──────────────────────────────
 
-JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
+JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar" 
 NEED_DOWNLOAD=0
 
 if [[ ! -f "${JAR_FILE}" ]]; then
@@ -166,7 +166,7 @@ echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
 
 set_property "online-mode"      "false"     "${DATA_DIR}/server.properties"
 set_property "server-port"      "25565"     "${DATA_DIR}/server.properties"
-set_property "server-ip"        "0.0.0.0"   "${DATA_DIR}/server.properties"
+set_property "server-ip"        ""          "${DATA_DIR}/server.properties"
 set_property "spawn-protection" "0"         "${DATA_DIR}/server.properties"
 
 echo -e "  ${C_GREEN}✓${C_RESET} server.properties configured"
@@ -182,8 +182,13 @@ fi
 # ─── Step 11: Launch Server ──────────────────────────────────────────────────
 
 JVM_FLAGS=(
+    # Railway IPv6 private mesh compatibility — CRITICAL
+    "-Djava.net.preferIPv6Addresses=true"
+    "-Djava.net.preferIPv4Stack=false"
+    # Memory
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"
+    # Aikar's G1GC Flags
     "-XX:+UseG1GC"
     "-XX:+ParallelRefProcEnabled"
     "-XX:MaxGCPauseMillis=200"

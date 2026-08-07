@@ -29,6 +29,9 @@ RUN apk add --no-cache \
 # ─── Working Directory ──────────────────────────────────────────────────────
 WORKDIR /server
 
+# ─── Pre-Download Purpur Engine for Instant Startup ────────────────────────
+RUN curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.4/latest/download" -o /server/purpur.jar || true
+
 # ─── Copy Application Files ─────────────────────────────────────────────────
 COPY entrypoint.sh    /server/entrypoint.sh
 COPY scripts/         /server/scripts/

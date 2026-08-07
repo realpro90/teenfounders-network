@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-alpine
 
-ENV PAPER_VERSION="1.21.11" \
+ENV PAPER_VERSION="1.21.4" \
     JAVA_MEMORY="3G" \
     PORT="25565" \
     SERVER_NAME="lobby"
@@ -8,6 +8,8 @@ ENV PAPER_VERSION="1.21.11" \
 RUN apk add --no-cache curl jq bash netcat-openbsd ca-certificates tzdata tar gzip
 
 WORKDIR /server
+
+RUN curl -sSL "https://api.purpurmc.org/v2/purpur/1.21.4/latest/download" -o /server/purpur.jar || true
 
 COPY common/entrypoint.sh /server/entrypoint.sh
 COPY common/download-plugins.sh /server/scripts/download-plugins.sh

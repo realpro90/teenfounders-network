@@ -90,11 +90,22 @@ JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
 if [[ ! -f "${JAR_FILE}" ]]; then
-    NEED_DOWNLOAD=1
+    if [[ -f "/server/purpur.jar" ]]; then
+        echo -e "  ${C_GREEN}✓${C_RESET} Copying pre-bundled Purpur ${PAPER_VERSION} engine..."
+        cp /server/purpur.jar "${JAR_FILE}"
+        NEED_DOWNLOAD=0
+    else
+        NEED_DOWNLOAD=1
+    fi
 elif ! unzip -t "${JAR_FILE}" >/dev/null 2>&1; then
     echo -e "  ${C_CYAN}▸${C_RESET} Server jar validation failed — re-downloading"
     rm -f "${JAR_FILE}"
-    NEED_DOWNLOAD=1
+    if [[ -f "/server/purpur.jar" ]]; then
+        cp /server/purpur.jar "${JAR_FILE}"
+        NEED_DOWNLOAD=0
+    else
+        NEED_DOWNLOAD=1
+    fi
 fi
 
 if [[ "${NEED_DOWNLOAD}" -eq 1 ]]; then

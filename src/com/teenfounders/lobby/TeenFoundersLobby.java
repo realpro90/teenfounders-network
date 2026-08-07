@@ -30,8 +30,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class TeenFoundersLobby extends JavaPlugin implements Listener {
@@ -48,25 +46,22 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Re-use built structure if generated flag exists to prevent 275k block main-thread freezes
-            File flagFile = new File(getDataFolder(), "generated.flag");
-            if (!flagFile.exists()) {
+            // Check if beacon monument exists at (0, 64, 0). If not, build the lobby structure immediately!
+            Block centerBlock = world.getBlockAt(0, 64, 0);
+            if (centerBlock.getType() != Material.BEACON) {
                 buildLobbyStructure(world);
-                try {
-                    getDataFolder().mkdirs();
-                    flagFile.createNewFile();
-                } catch (IOException ignored) {}
+            } else {
+                getLogger().info("Central Plaza structure verified at (0,64,0) — skipping rebuild.");
             }
 
             spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, -5.0f);
             world.setSpawnLocation(0, 65, 0);
         }
 
-        getLogger().info("TeenFoundersLobby v3.0 enabled! Modern Paper APIs, PersistentDataContainer & Zero-lag world caching active.");
+        getLogger().info("TeenFoundersLobby v3.1 enabled! Central Plaza verified, spawn point set to (0.5, 65.0, 0.5).");
     }
 
     private void configureWorld(World world) {
-        // Modern Type-Safe GameRule API
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
         world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
@@ -81,7 +76,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     }
 
     private void buildLobbyStructure(World world) {
-        getLogger().info("Generating Central Plaza & Beacon Monument...");
+        getLogger().info("Building Central Plaza, Beacon Monument & 4 Portals...");
 
         // 1. Central Plaza Floor (100x100 from X=-50 to 50, Z=-50 to 50)
         for (int x = -50; x <= 50; x++) {
@@ -159,7 +154,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // Single 1-tick delayed teleport ensures Paper processes join before position set
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if (spawnLocation != null && player.isOnline()) {
                 player.teleport(spawnLocation);
@@ -168,12 +162,10 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         setupPlayerLobbyState(player);
 
-        // Titles & Audio
         player.sendTitle("§6§lTEENFOUNDERS", "§fBuild Network · Future of Humanity", 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.5f);
 
-        // Welcome Message
         player.sendMessage("§6§m--------------------------------------------------");
         player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
         player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Use your §6Server Navigator §fto choose a game mode.");
@@ -204,7 +196,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
     }
 
-    // High-Performance PlayerMoveEvent with Y=50 guard check
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.getTo().getY() >= 50) return;
@@ -216,7 +207,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    // Protection: Block breaking & placing
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         if (!event.getPlayer().isOp()) event.setCancelled(true);
@@ -227,7 +217,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (!event.getPlayer().isOp()) event.setCancelled(true);
     }
 
-    // Protection: Damage & PvP
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
         event.setCancelled(true);
@@ -249,7 +238,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         event.setCancelled(true);
     }
 
-    // Modern PersistentDataContainer Item Interaction
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
@@ -271,7 +259,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             }
         }
 
-        // Cancel interacting with buttons, doors, traps, chests in Adventure mode
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Block b = event.getClickedBlock();
             if (b != null && !player.isOp()) {

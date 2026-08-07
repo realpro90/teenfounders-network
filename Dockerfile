@@ -38,8 +38,8 @@ EXPOSE 25565/tcp
 EXPOSE 25565/udp
 EXPOSE 19132/udp
 
-# Mount volume for persistent storage on Railway
-VOLUME ["/data"]
+# Mount volume for persistent storage on Railway via Railway Dashboard/CLI
+# EXPOSE ports for Minecraft server
 
 # Define container healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

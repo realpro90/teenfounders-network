@@ -17,7 +17,6 @@ COPY proxy/secret.txt /server/forwarding.secret
 RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh
 
 EXPOSE 25565/tcp
-VOLUME ["/data"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s CMD /server/scripts/healthcheck.sh || exit 1
 

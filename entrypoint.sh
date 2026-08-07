@@ -101,6 +101,7 @@ fi
 
 # 9. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
 JVM_FLAGS=(
+    "-Djava.net.preferIPv6Addresses=true"
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"
     "-XX:+UseG1GC"

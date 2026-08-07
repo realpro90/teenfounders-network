@@ -1,6 +1,6 @@
 # ==============================================================================
 # TeenFounders Network - Proxy Production Dockerfile
-# Eclipse Temurin OpenJDK 21 Runtime
+# Eclipse Temurin OpenJDK 21 Runtime with Railway IPv6 Mesh Support
 # ==============================================================================
 
 FROM eclipse-temurin:21-jre-alpine
@@ -21,4 +21,4 @@ COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 
-ENTRYPOINT ["java", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]
+ENTRYPOINT ["java", "-Djava.net.preferIPv6Addresses=true", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]

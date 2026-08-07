@@ -8,14 +8,17 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fox;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,6 +35,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -39,17 +43,25 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     private Location spawnLocation;
     private NamespacedKey itemKey;
     private NamespacedKey npcKey;
+    private NamespacedKey petKey;
+    private final Map<UUID, Entity> playerPets = new HashMap<>();
+    private final Random random = new Random();
 
     @Override
     public void onEnable() {
         itemKey = new NamespacedKey(this, "lobby_item");
         npcKey = new NamespacedKey(this, "lobby_npc");
+        petKey = new NamespacedKey(this, "lobby_pet");
         Bukkit.getPluginManager().registerEvents(this, this);
 
         World world = Bukkit.getWorlds().get(0);
@@ -67,7 +79,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             spawnLobbyNPCs(world);
         }
 
-        getLogger().info("TeenFoundersLobby v4.0 enabled! Interactive NPCs spawned, Void Guard active, Inventory Sync online.");
+        getLogger().info("TeenFoundersLobby v5.0 enabled! Singapore Region active, Random Companion Pets, Storyline Quests, PvP Arena Pit online.");
     }
 
     private void configureWorld(World world) {
@@ -86,7 +98,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     private void purgeMobs(World world) {
         for (Entity entity : world.getEntities()) {
-            if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING))) {
+            if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
                 entity.remove();
             }
         }
@@ -97,7 +109,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sy = spawnLocation.getY();
         double sz = spawnLocation.getZ();
 
-        // Remove old NPCs to prevent duplicates
         for (Entity entity : world.getEntities()) {
             if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
                 entity.remove();
@@ -131,17 +142,53 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         npc.setCollidable(false);
         npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
 
-        // Subtitle Hologram
         Location holoLoc = loc.clone().add(0, 2.2, 0);
         ArmorStand holo = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
         holo.setCustomName(subtitle);
         holo.setCustomNameVisible(true);
         holo.setGravity(false);
         holo.setCanPickupItems(false);
-        holo.setCustomNameVisible(true);
         holo.setVisible(false);
         holo.setMarker(true);
         holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
+    }
+
+    private void spawnRandomPet(Player player) {
+        // Remove existing pet if any
+        if (playerPets.containsKey(player.getUniqueId())) {
+            Entity oldPet = playerPets.get(player.getUniqueId());
+            if (oldPet != null && oldPet.isValid()) oldPet.remove();
+        }
+
+        World world = player.getWorld();
+        Location loc = player.getLocation().add(1, 0, 1);
+        int petType = random.nextInt(3);
+
+        Entity pet = null;
+        if (petType == 0) {
+            Wolf wolf = (Wolf) world.spawnEntity(loc, EntityType.WOLF);
+            wolf.setOwner(player);
+            wolf.setTamed(true);
+            wolf.setCustomName("§6§l" + player.getName() + "'s Companion Wolf");
+            pet = wolf;
+        } else if (petType == 1) {
+            Cat cat = (Cat) world.spawnEntity(loc, EntityType.CAT);
+            cat.setOwner(player);
+            cat.setTamed(true);
+            cat.setCustomName("§b§l" + player.getName() + "'s Mystic Cat");
+            pet = cat;
+        } else {
+            Fox fox = (Fox) world.spawnEntity(loc, EntityType.FOX);
+            fox.setCustomName("§e§l" + player.getName() + "'s Founder Fox");
+            pet = fox;
+        }
+
+        if (pet != null) {
+            pet.setCustomNameVisible(true);
+            pet.setInvulnerable(true);
+            pet.getPersistentDataContainer().set(petKey, PersistentDataType.STRING, player.getUniqueId().toString());
+            playerPets.put(player.getUniqueId(), pet);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -154,19 +201,32 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 15L);
 
+        // Spawn Random Companion Pet
+        Bukkit.getScheduler().runTaskLater(this, () -> spawnRandomPet(player), 20L);
+
         setupPlayerLobbyState(player);
 
-        player.sendTitle("§6§lTEENFOUNDERS", "§fBuild Network · Future of Humanity", 10, 70, 20);
+        // Storyline Title & Lore Dialogue
+        player.sendTitle("§6§lTEENFOUNDERS", "§fChapter I: The Builder's Awakening", 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.5f);
 
         player.sendMessage("§6§m--------------------------------------------------");
-        player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Talk to any §6Guide NPC §fto join a game mode.");
-        player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
-        player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
+        player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK §7[Singapore Region]");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Your journey as a Founder begins here.");
+        player.sendMessage("  §7• Right-click §aBuild Master §7for Creative Plots");
+        player.sendMessage("  §7• Right-click §cSurvival Champion §7for the 15-Day Event");
+        player.sendMessage("  §7• Step into the §ePvP Arena Pit §7below spawn to fight!");
         player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
         player.sendMessage("§6§m--------------------------------------------------");
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Entity pet = playerPets.remove(event.getPlayer().getUniqueId());
+        if (pet != null && pet.isValid()) {
+            pet.remove();
+        }
     }
 
     private void teleportToSpawn(Player player) {
@@ -194,7 +254,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING))) {
+        if (entity instanceof Slime || (entity instanceof Mob && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
             event.setCancelled(true);
         }
     }
@@ -230,7 +290,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
         
-        // Instant Void Protection Guard (Teleports back to spawn if Y < 40 or Y < 0)
+        // Instant Void Protection Guard (Teleports back to spawn if Y < 40)
         if (loc.getY() < 40) {
             teleportToSpawn(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
@@ -249,11 +309,23 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
+        // Allow damage inside PvP Arena Pit (Z < -15 near PvP NPC)
+        Location loc = event.getEntity().getLocation();
+        if (loc.getZ() < -15) {
+            event.setCancelled(false);
+            return;
+        }
         event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPvP(EntityDamageByEntityEvent event) {
+        // Allow PvP combat inside PvP Arena Pit (Z < -15 near PvP NPC)
+        Location loc = event.getEntity().getLocation();
+        if (loc.getZ() < -15) {
+            event.setCancelled(false);
+            return;
+        }
         event.setCancelled(true);
     }
 

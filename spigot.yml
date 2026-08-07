@@ -10,8 +10,8 @@ messages:
   whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
   unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
   server-full: "§c[TeenFounders] Server is currently full! Consider upgrading to VIP."
-  outdated-client: "§c[TeenFounders] Outdated client! Please connect with Minecraft 1.21.x."
-  outdated-server: "§c[TeenFounders] Outdated server! Please update your client."
+  outdated-client: "§c[TeenFounders] Please connect using Minecraft 1.20 - 1.21.11."
+  outdated-server: "§c[TeenFounders] Connecting to TeenFounders Network..."
   restart: "§c[TeenFounders] Server is restarting..."
 
 world-settings:

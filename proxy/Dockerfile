@@ -1,6 +1,6 @@
 # ==============================================================================
 # TeenFounders Network - Proxy Production Dockerfile
-# Eclipse Temurin OpenJDK 21 Runtime with Pre-Bundled BungeeCord Modules
+# Eclipse Temurin OpenJDK 21 Runtime with Pre-Bundled BungeeCord & ViaVersion
 # ==============================================================================
 
 FROM eclipse-temurin:21-jre-alpine
@@ -22,7 +22,12 @@ RUN mkdir -p /proxy/modules && \
     curl -sSL "https://hub.spigotmc.org/jenkins/job/BungeeCord/lastSuccessfulBuild/artifact/module/cmd-send/target/cmd_send.jar" -o /proxy/modules/cmd_send.jar || true && \
     curl -sSL "https://hub.spigotmc.org/jenkins/job/BungeeCord/lastSuccessfulBuild/artifact/module/cmd-server/target/cmd_server.jar" -o /proxy/modules/cmd_server.jar || true
 
-# 3. Create dummy directory for reconnect.yml to prevent reconnect_yaml module from storing/redirecting players away from Lobby
+# 3. Pre-bundle ViaVersion & ViaBackwards into /proxy/plugins for 1.21.11 protocol support
+RUN mkdir -p /proxy/plugins && \
+    curl -sSL "https://github.com/ViaVersion/ViaVersion/releases/download/5.2.1/ViaVersion-5.2.1.jar" -o /proxy/plugins/ViaVersion.jar || true && \
+    curl -sSL "https://github.com/ViaVersion/ViaBackwards/releases/download/5.2.1/ViaBackwards-5.2.1.jar" -o /proxy/plugins/ViaBackwards.jar || true
+
+# 4. Create dummy directory for reconnect.yml
 RUN mkdir -p /proxy/reconnect.yml
 
 COPY proxy/config.yml /proxy/config.yml

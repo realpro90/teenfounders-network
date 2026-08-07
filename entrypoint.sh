@@ -174,7 +174,7 @@ echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
 
 set_property "online-mode"      "false"     "${DATA_DIR}/server.properties"
 set_property "server-port"      "25565"     "${DATA_DIR}/server.properties"
-set_property "server-ip"        "0.0.0.0"   "${DATA_DIR}/server.properties"
+set_property "server-ip"        ""          "${DATA_DIR}/server.properties"
 set_property "spawn-protection" "0"         "${DATA_DIR}/server.properties"
 
 echo -e "  ${C_GREEN}✓${C_RESET} server.properties configured"

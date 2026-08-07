@@ -41,7 +41,12 @@ if [ -d "/server/config_templates" ]; then
     cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
 fi
 
-# 4. Force enable BungeeCord forwarding in spigot.yml
+# 4. Provision 500x500 Lobby Map if setup script exists
+if [ -f "/server/lobby/setup_lobby_world.sh" ]; then
+    /bin/bash /server/lobby/setup_lobby_world.sh "$DATA_DIR" 2>/dev/null || true
+fi
+
+# 5. Force enable BungeeCord forwarding in spigot.yml
 cat << 'EOF' > "$DATA_DIR/spigot.yml"
 config-version: 12
 
@@ -56,7 +61,7 @@ messages:
   outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
 EOF
 
-# 5. Force enable BungeeCord forwarding in config/paper-global.yml
+# 6. Force enable BungeeCord forwarding in config/paper-global.yml
 cat << 'EOF' > "$DATA_DIR/config/paper-global.yml"
 _version: 30
 
@@ -69,7 +74,7 @@ proxies:
     secret: ""
 EOF
 
-# 6. Force online-mode=false & server-port=25565 in server.properties
+# 7. Force online-mode=false & server-port=25565 in server.properties
 touch "$DATA_DIR/server.properties"
 if grep -q "^online-mode=" "$DATA_DIR/server.properties"; then
     sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
@@ -89,12 +94,12 @@ else
     echo "server-ip=0.0.0.0" >> "$DATA_DIR/server.properties"
 fi
 
-# 7. Invoke Plugin Downloader
+# 8. Invoke Plugin Downloader
 if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 8. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
+# 9. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

@@ -127,12 +127,15 @@ if [[ -f "${DATA_DIR}/spigot.yml" ]]; then
     if grep -q "bungeecord:" "${DATA_DIR}/spigot.yml"; then
         sed -i 's/bungeecord:.*/bungeecord: true/' "${DATA_DIR}/spigot.yml"
     fi
+    set_property "moved-too-quickly-multiplier" "100.0" "${DATA_DIR}/spigot.yml"
 else
     cat << 'SPIGOT_EOF' > "${DATA_DIR}/spigot.yml"
 config-version: 12
 
 settings:
   bungeecord: true
+  moved-too-quickly-multiplier: 100.0
+  moved-wrongly-threshold: 100.0
 
 messages:
   whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."

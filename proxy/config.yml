@@ -41,21 +41,21 @@ online_mode: false
 servers:
   lobby:
     motd: '&6TeenFounders Lobby'
-    address: lobby:25565
+    address: lobby.railway.internal:25565
     restricted: false
   creative:
     motd: '&6TeenFounders Creative Plots'
-    address: creative:25565
+    address: creative.railway.internal:25565
     restricted: false
   competition:
     motd: '&6TeenFounders Build Competition'
-    address: competition:25565
+    address: competition.railway.internal:25565
     restricted: false
   survival-event:
     motd: '&6TeenFounders 15-Day Survival Event'
-    address: survival-event:25565
+    address: survival-event.railway.internal:25565
     restricted: false
   pvp:
     motd: '&6TeenFounders PvP Arena'
-    address: pvp:25565
+    address: pvp.railway.internal:25565
     restricted: false

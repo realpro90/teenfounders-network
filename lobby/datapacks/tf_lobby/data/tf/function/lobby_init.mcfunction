@@ -6,6 +6,9 @@
 # --- Announce ---
 say §6§l[TeenFounders] §fLobby Provisioning System loading...
 
+# --- Force Load Lobby Chunks ---
+forceload add -100 -100 100 100
+
 # --- Game Rules for Lobby ---
 gamerule doDaylightCycle false
 gamerule doWeatherCycle false

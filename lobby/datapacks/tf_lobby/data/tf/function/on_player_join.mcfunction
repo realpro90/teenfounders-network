@@ -6,6 +6,11 @@
 # ─── Mark player as joined ───────────────────────────────────────
 scoreboard players set @s tf_joined 1
 
+# ─── Materialize Lobby Structure Under Player ───────────────────
+function tf:build_plaza
+function tf:build_portals
+function tf:build_decorations
+
 # ─── Teleport to spawn facing beacon monument ───────────────────
 tp @s 0.5 65.0 8.0 0 -5
 

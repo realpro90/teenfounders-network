@@ -9,7 +9,7 @@ set -e
 DATA_DIR="/data"
 PAPER_VERSION="${PAPER_VERSION:-1.21.11}"
 MEMORY="${JAVA_MEMORY:-3G}"
-PORT="${PORT:-25565}"
+PORT="25565"
 
 echo "======================================================================"
 echo "          🚀 TEENFOUNDERS NETWORK - BACKEND SERVER LAUNCH 🚀         "
@@ -59,12 +59,19 @@ messages:
   outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
 EOF
 
-# 6. Invoke Plugin Downloader Script
+# 6. Force server-port=25565 in server.properties
+if [ -f "$DATA_DIR/server.properties" ]; then
+    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
+    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+    sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
+fi
+
+# 7. Invoke Plugin Downloader Script
 if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 7. Aikar's High-Performance G1GC JVM Flags
+# 8. Aikar's High-Performance G1GC JVM Flags
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"
@@ -90,5 +97,5 @@ JVM_FLAGS=(
     "-Daio.paper.async-chunk-loading=true"
 )
 
-echo "[TF-INIT] Executing Java PaperMC Engine with ${MEMORY} RAM..."
+echo "[TF-INIT] Executing Java PaperMC Engine on Port 25565 with ${MEMORY} RAM..."
 exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui

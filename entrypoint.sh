@@ -9,7 +9,7 @@ set -e
 DATA_DIR="/data"
 PAPER_VERSION="${PAPER_VERSION:-1.21.11}"
 MEMORY="${JAVA_MEMORY:-4G}"
-PORT="${PORT:-25565}"
+PORT="25565"
 
 echo "======================================================================"
 echo "          🚀 TEENFOUNDERS BUILD NETWORK - MINECRAFT SERVER 🚀         "
@@ -56,28 +56,16 @@ messages:
   outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
 EOF
 
-# 5. Invoke Plugin Downloader
-if [ -f "/server/scripts/download-plugins.sh" ]; then
-    /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
+# 5. Force server-port=25565 in server.properties
+if [ -f "$DATA_DIR/server.properties" ]; then
+    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
+    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+    sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
 fi
 
-# 6. Overwrite dynamic environment variables in server.properties if present
-if [ -f "$DATA_DIR/server.properties" ]; then
-    if [ -n "$MOTD" ]; then
-        sed -i "s/^motd=.*/motd=${MOTD}/" "$DATA_DIR/server.properties"
-    fi
-    if [ -n "$MAX_PLAYERS" ]; then
-        sed -i "s/^max-players=.*/max-players=${MAX_PLAYERS}/" "$DATA_DIR/server.properties"
-    fi
-    if [ -n "$VIEW_DISTANCE" ]; then
-        sed -i "s/^view-distance=.*/view-distance=${VIEW_DISTANCE}/" "$DATA_DIR/server.properties"
-    fi
-    if [ -n "$SIMULATION_DISTANCE" ]; then
-        sed -i "s/^simulation-distance=.*/simulation-distance=${SIMULATION_DISTANCE}/" "$DATA_DIR/server.properties"
-    fi
-    if [ -n "$PORT" ]; then
-        sed -i "s/^server-port=.*/server-port=${PORT}/" "$DATA_DIR/server.properties"
-    fi
+# 6. Invoke Plugin Downloader
+if [ -f "/server/scripts/download-plugins.sh" ]; then
+    /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
 # 7. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
@@ -107,8 +95,5 @@ JVM_FLAGS=(
     "-Dpaper.player-connection-throttle=3000"
 )
 
-echo "[TF-INIT] Starting PaperMC Minecraft Server..."
-echo "[TF-INIT] Memory Allocation: $MEMORY | Target Port: $PORT"
-
-# Execute Java with Aikar's Flags
+echo "[TF-INIT] Starting PaperMC Minecraft Server on Port 25565..."
 exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui

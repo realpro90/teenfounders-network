@@ -49,19 +49,21 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         World world = Bukkit.getWorlds().get(0);
         if (world != null) {
             configureWorld(world);
-            
-            // Build Plaza right on top of the ground (Y=4..8)
-            buildLobbyStructure(world);
 
-            // Spawn directly in the center of the Beacon Monument at (0.5, 8.0, 0.5)
-            spawnLocation = new Location(world, 0.5, 8.0, 0.5, 0.0f, -5.0f);
-            world.setSpawnLocation(0, 8, 0);
+            // Use world spawn from level.dat or default to (0.5, 65.0, 0.5)
+            Location worldSpawn = world.getSpawnLocation();
+            if (worldSpawn != null) {
+                spawnLocation = new Location(world, worldSpawn.getX() + 0.5, worldSpawn.getY() + 0.5,
+                        worldSpawn.getZ() + 0.5, worldSpawn.getYaw(), worldSpawn.getPitch());
+            } else {
+                spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
+            }
 
-            // Purge all slimes and mobs immediately
+            // Purge all mobs and slimes
             purgeMobs(world);
         }
 
-        getLogger().info("TeenFoundersLobby v3.4 enabled! Plaza built at ground level (Y=4..8), Spawn set to (0.5, 8.0, 0.5).");
+        getLogger().info("TeenFoundersLobby v3.5 enabled! Custom lobbyworld active, Spawn set to " + spawnLocation);
     }
 
     private void configureWorld(World world) {
@@ -86,91 +88,14 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    private void buildLobbyStructure(World world) {
-        getLogger().info("Building 200x200 Central Plaza at ground level Y=4..7...");
-
-        // 1. Central Plaza Floor (200x200 from X=-100 to 100, Z=-100 to 100 at ground level Y=4..7)
-        for (int x = -100; x <= 100; x++) {
-            for (int z = -100; z <= 100; z++) {
-                world.getBlockAt(x, 0, z).setType(Material.BEDROCK, false);
-                for (int y = 1; y <= 5; y++) {
-                    world.getBlockAt(x, y, z).setType(Material.BLACKSTONE, false);
-                }
-
-                if (Math.abs(x) == 100 || Math.abs(z) == 100) {
-                    world.getBlockAt(x, 7, z).setType(Material.POLISHED_BLACKSTONE_BRICK_WALL, false);
-                } else if (x % 10 == 0 || z % 10 == 0) {
-                    world.getBlockAt(x, 7, z).setType(Material.ORANGE_CONCRETE, false);
-                } else if ((x + z) % 8 == 0) {
-                    world.getBlockAt(x, 7, z).setType(Material.SEA_LANTERN, false);
-                } else {
-                    world.getBlockAt(x, 7, z).setType(Material.SMOOTH_QUARTZ, false);
-                }
-
-                for (int y = 8; y <= 50; y++) {
-                    Block b = world.getBlockAt(x, y, z);
-                    if (b.getType() != Material.AIR) {
-                        b.setType(Material.AIR, false);
-                    }
-                }
-            }
-        }
-
-        // 2. Central Beacon Monument (Pyramid at Y=5..7, Beacon at Y=7)
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                world.getBlockAt(x, 5, z).setType(Material.IRON_BLOCK, false);
-            }
-        }
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 2; z++) {
-                world.getBlockAt(x, 6, z).setType(Material.IRON_BLOCK, false);
-            }
-        }
-        world.getBlockAt(0, 7, 0).setType(Material.BEACON, false);
-        world.getBlockAt(0, 8, 0).setType(Material.ORANGE_STAINED_GLASS, false);
-
-        int[][] corners = {{-4, -4}, {-4, 4}, {4, -4}, {4, 4}};
-        for (int[] c : corners) {
-            for (int y = 7; y <= 11; y++) {
-                world.getBlockAt(c[0], y, c[1]).setType(Material.POLISHED_BLACKSTONE_BRICKS, false);
-            }
-            world.getBlockAt(c[0], 12, c[1]).setType(Material.SEA_LANTERN, false);
-        }
-
-        // 3. Portals
-        buildPortalArch(world, 0, 7, -30, Material.ORANGE_CONCRETE, Material.ORANGE_STAINED_GLASS);
-        buildPortalArch(world, 0, 7, 30, Material.YELLOW_CONCRETE, Material.YELLOW_STAINED_GLASS);
-        buildPortalArch(world, -30, 7, 0, Material.GREEN_CONCRETE, Material.LIME_STAINED_GLASS);
-        buildPortalArch(world, 30, 7, 0, Material.RED_CONCRETE, Material.RED_STAINED_GLASS);
-
-        getLogger().info("Central Plaza structure built successfully at ground level Y=7!");
-    }
-
-    private void buildPortalArch(World world, int cx, int cy, int cz, Material frame, Material glass) {
-        boolean isZAxis = (cx == 0);
-        for (int i = -3; i <= 3; i++) {
-            for (int h = 0; h <= 6; h++) {
-                int x = isZAxis ? cx + i : cx;
-                int z = isZAxis ? cz : cz + i;
-                if (i == -3 || i == 3 || h == 0 || h == 6) {
-                    world.getBlockAt(x, cy + h, z).setType(frame, false);
-                } else {
-                    world.getBlockAt(x, cy + h, z).setType(glass, false);
-                }
-            }
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         purgeMobs(player.getWorld());
 
-        // Guaranteed Triple Teleport to Central Spawn (0.5, 8.0, 0.5)
-        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 1L);
-        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 5L);
-        Bukkit.getScheduler().runTaskLater(this, () -> teleportToCenter(player), 15L);
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);
+        Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 15L);
 
         setupPlayerLobbyState(player);
 
@@ -180,12 +105,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         player.sendMessage("§6§m--------------------------------------------------");
         player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Use your §6Server Navigator §fto choose a game mode.");
+        player.sendMessage(
+                "  §fWelcome, §e" + player.getName() + "§f! Use your §6Server Navigator §fto choose a game mode.");
         player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
         player.sendMessage("§6§m--------------------------------------------------");
     }
 
-    private void teleportToCenter(Player player) {
+    private void teleportToSpawn(Player player) {
         if (spawnLocation != null && player.isOnline()) {
             player.teleport(spawnLocation);
         }
@@ -209,39 +135,45 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
         setupPlayerLobbyState(event.getPlayer());
-        teleportToCenter(event.getPlayer());
+        teleportToSpawn(event.getPlayer());
     }
 
     private void setupPlayerLobbyState(Player player) {
         player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
 
-        player.getInventory().setItem(0, createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Right-click to open server menu"));
-        player.getInventory().setItem(1, createItem(Material.CLOCK, "cosmetics", "§b§lCosmetics", "§7Right-click to open cosmetics"));
-        player.getInventory().setItem(4, createItem(Material.BOOK, "rules", "§e§lRules & Info", "§7Right-click to read network rules"));
-        player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
+        player.getInventory().setItem(0,
+                createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Right-click to open server menu"));
+        player.getInventory().setItem(1,
+                createItem(Material.CLOCK, "cosmetics", "§b§lCosmetics", "§7Right-click to open cosmetics"));
+        player.getInventory().setItem(4,
+                createItem(Material.BOOK, "rules", "§e§lRules & Info", "§7Right-click to read network rules"));
+        player.getInventory().setItem(8,
+                createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
-        
-        // Perimeter guard: If player strays outside X/Z = +-95 or falls below Y = 0, teleport back to center
-        if (Math.abs(loc.getX()) > 95 || Math.abs(loc.getZ()) > 95 || loc.getY() < 0) {
-            teleportToCenter(player);
+
+        // Void guard: If player falls below Y = 0, teleport back to spawn
+        if (loc.getY() < 0) {
+            teleportToSpawn(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.getPlayer().isOp()) event.setCancelled(true);
+        if (!event.getPlayer().isOp())
+            event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!event.getPlayer().isOp()) event.setCancelled(true);
+        if (!event.getPlayer().isOp())
+            event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -290,7 +222,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             Block b = event.getClickedBlock();
             if (b != null && !player.isOp()) {
                 Material m = b.getType();
-                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER") || m.name().contains("CHEST")) {
+                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER")
+                        || m.name().contains("CHEST")) {
                     event.setCancelled(true);
                 }
             }

@@ -33,6 +33,7 @@ WORKDIR /server
 COPY entrypoint.sh    /server/entrypoint.sh
 COPY scripts/         /server/scripts/
 COPY lobby/           /server/lobby/
+COPY lobbyworld/      /server/lobbyworld/
 COPY plugins/         /server/plugins/
 COPY config_templates/ /server/config_templates/
 

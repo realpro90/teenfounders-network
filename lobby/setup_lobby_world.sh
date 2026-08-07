@@ -649,10 +649,22 @@ _install_lobby() {
     # ── Step 4: Extract pre-packaged local or downloaded world ───────────
     _section "Installing Production Lobby World Package"
 
-    local local_archive="/server/lobby/teenfounders-lobby-world.tar.gz"
-    local local_world="/server/lobby/world"
+    local user_tar="/server/lobby/lobbyworld.tar.gz"
+    local user_lobbyworld="/server/lobbyworld"
 
-    if [[ -f "${local_archive}" ]]; then
+    if [[ -f "${user_tar}" ]]; then
+        _info "Found user-provided lobbyworld archive: ${user_tar}"
+        rm -rf "${WORLD_DIR}"
+        mkdir -p "${WORLD_DIR}"
+        tar -xzf "${user_tar}" --strip-components=1 -C "${WORLD_DIR}"
+        INSTALL_METHOD="user_lobbyworld_tar"
+        _ok "Extracted user-provided lobbyworld archive into ${WORLD_DIR}"
+    elif [[ -d "${user_lobbyworld}" ]]; then
+        _info "Found user-provided lobbyworld directory: ${user_lobbyworld}"
+        cp -rf "${user_lobbyworld}/"* "${WORLD_DIR}/"
+        INSTALL_METHOD="user_lobbyworld"
+        _ok "Copied user-provided lobbyworld into ${WORLD_DIR}"
+    elif [[ -f "${local_archive}" ]]; then
         _info "Found pre-bundled production lobby archive: ${local_archive}"
         tar -xzf "${local_archive}" -C "${DATA_DIR}"
         INSTALL_METHOD="bundled_archive"

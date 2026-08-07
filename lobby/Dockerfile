@@ -12,9 +12,11 @@ WORKDIR /server
 COPY common/entrypoint.sh /server/entrypoint.sh
 COPY common/download-plugins.sh /server/scripts/download-plugins.sh
 COPY common/healthcheck.sh /server/scripts/healthcheck.sh
+COPY lobby/setup_lobby_world.sh /server/lobby/setup_lobby_world.sh
+COPY lobbyworld/ /server/lobbyworld/
 COPY proxy/secret.txt /server/forwarding.secret
 
-RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh
+RUN chmod +x /server/entrypoint.sh /server/scripts/*.sh /server/lobby/*.sh
 
 EXPOSE 25565/tcp
 

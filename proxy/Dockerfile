@@ -29,5 +29,5 @@ COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 
-# Run BungeeCord with preferIPv6Addresses=true for Railway mesh DNS resolution (*.railway.internal) and 30s connection timeout
-ENTRYPOINT ["java", "-Djava.net.preferIPv6Addresses=true", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]
+# Run BungeeCord with preferIPv4Stack=true for 100% reliable Railway private IPv4 mesh connections
+ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=true", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]

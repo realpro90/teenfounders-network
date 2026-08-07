@@ -69,11 +69,24 @@ proxies:
     secret: ""
 EOF
 
-# 6. Force server-port=25565 & online-mode=false in server.properties
-if [ -f "$DATA_DIR/server.properties" ]; then
-    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
-    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+# 6. Force online-mode=false & server-port=25565 in server.properties
+touch "$DATA_DIR/server.properties"
+if grep -q "^online-mode=" "$DATA_DIR/server.properties"; then
     sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
+else
+    echo "online-mode=false" >> "$DATA_DIR/server.properties"
+fi
+
+if grep -q "^server-port=" "$DATA_DIR/server.properties"; then
+    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
+else
+    echo "server-port=25565" >> "$DATA_DIR/server.properties"
+fi
+
+if grep -q "^server-ip=" "$DATA_DIR/server.properties"; then
+    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+else
+    echo "server-ip=0.0.0.0" >> "$DATA_DIR/server.properties"
 fi
 
 # 7. Invoke Plugin Downloader
@@ -108,5 +121,5 @@ JVM_FLAGS=(
     "-Dpaper.player-connection-throttle=3000"
 )
 
-echo "[TF-INIT] Starting PaperMC Minecraft Server on Port 25565..."
+echo "[TF-INIT] Starting PaperMC Minecraft Server (online-mode=false) on Port 25565..."
 exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui

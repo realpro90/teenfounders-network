@@ -72,11 +72,24 @@ proxies:
     secret: ""
 EOF
 
-# 7. Force server-port=25565 & online-mode=false in server.properties
-if [ -f "$DATA_DIR/server.properties" ]; then
-    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
-    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+# 7. Force online-mode=false & server-port=25565 in server.properties
+touch "$DATA_DIR/server.properties"
+if grep -q "^online-mode=" "$DATA_DIR/server.properties"; then
     sed -i 's/^online-mode=.*/online-mode=false/' "$DATA_DIR/server.properties"
+else
+    echo "online-mode=false" >> "$DATA_DIR/server.properties"
+fi
+
+if grep -q "^server-port=" "$DATA_DIR/server.properties"; then
+    sed -i 's/^server-port=.*/server-port=25565/' "$DATA_DIR/server.properties"
+else
+    echo "server-port=25565" >> "$DATA_DIR/server.properties"
+fi
+
+if grep -q "^server-ip=" "$DATA_DIR/server.properties"; then
+    sed -i 's/^server-ip=.*/server-ip=0.0.0.0/' "$DATA_DIR/server.properties"
+else
+    echo "server-ip=0.0.0.0" >> "$DATA_DIR/server.properties"
 fi
 
 # 8. Invoke Plugin Downloader Script
@@ -110,5 +123,5 @@ JVM_FLAGS=(
     "-Daio.paper.async-chunk-loading=true"
 )
 
-echo "[TF-INIT] Executing Java PaperMC Engine on Port 25565 with ${MEMORY} RAM..."
+echo "[TF-INIT] Executing Java PaperMC Engine (offline-mode=false) on Port 25565 with ${MEMORY} RAM..."
 exec java "${JVM_FLAGS[@]}" -jar "$JAR_FILE" nogui

@@ -67,18 +67,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            Location worldSpawn = world.getSpawnLocation();
-            if (worldSpawn != null) {
-                spawnLocation = new Location(world, worldSpawn.getX() + 0.5, worldSpawn.getY() + 0.5, worldSpawn.getZ() + 0.5, worldSpawn.getYaw(), worldSpawn.getPitch());
-            } else {
-                spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
-            }
+            // Set spawn to FreeBuild2 plaza (0.5, 66.0, 17.5)
+            spawnLocation = new Location(world, 0.5, 66.0, 17.5, 0.0f, 0.0f);
+            world.setSpawnLocation(0, 66, 17);
 
             // Spawn NPCs after chunks load
-            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 40L);
+            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
         }
 
-        getLogger().info("TeenFoundersLobby v5.1 enabled! Citizens NPC Protection & Chunk Load Delay active.");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeBuild2 World active at (0.5, 66.0, 17.5).");
     }
 
     private void configureWorld(World world) {
@@ -100,7 +97,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             if (entity instanceof Slime) {
                 entity.remove();
             } else if (entity instanceof Mob) {
-                // Do NOT purge Citizens NPCs or registered Lobby NPCs!
                 if (!entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING)) {
                     entity.remove();
                 }
@@ -125,13 +121,11 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         // 4. PvP Gladiator (Z - 3)
         createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Right-Click to Join!");
 
-        getLogger().info("4 Interactive Guide NPCs verified right at spawn!");
+        getLogger().info("4 Interactive Guide NPCs spawned at FreeBuild2 Plaza (0.5, 66.0, 17.5)!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
-        // Ensure chunk is loaded before spawning
         world.getChunkAtAsync(loc).thenAccept(chunk -> {
-            // Check if NPC already exists
             for (Entity e : loc.getNearbyEntities(1.5, 2.0, 1.5)) {
                 if (e.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
                     return;
@@ -203,27 +197,23 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         purgeMobs(player.getWorld());
 
-        // Guaranteed Triple Teleport to Spawn Location
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 15L);
 
-        // Spawn Random Companion Pet
         Bukkit.getScheduler().runTaskLater(this, () -> spawnRandomPet(player), 20L);
 
         setupPlayerLobbyState(player);
 
-        // Storyline Title & Lore Dialogue
-        player.sendTitle("§6§lTEENFOUNDERS", "§fChapter I: The Builder's Awakening", 10, 70, 20);
+        player.sendTitle("§6§lFREEBUILD LOBBY", "§fWelcome to FreeBuild2 Network Plaza", 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.5f);
 
         player.sendMessage("§6§m--------------------------------------------------");
-        player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK §7[Singapore Region]");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Your journey as a Founder begins here.");
-        player.sendMessage("  §7• Right-click §aBuild Master §7for Creative Plots");
-        player.sendMessage("  §7• Right-click §cSurvival Champion §7for the 15-Day Event");
-        player.sendMessage("  §7• Step into the §ePvP Arena Pit §7below spawn to fight!");
+        player.sendMessage("  §6§lTEENFOUNDERS FREEBUILD NETWORK");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! FreeBuild2 World active at (0.5, 66.0, 17.5).");
+        player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
+        player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
         player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
         player.sendMessage("§6§m--------------------------------------------------");
     }
@@ -297,7 +287,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
         
-        // Instant Void Protection Guard (Teleports back to spawn if Y < 40)
+        // Void protection threshold
         if (loc.getY() < 40) {
             teleportToSpawn(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
@@ -317,7 +307,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
         Location loc = event.getEntity().getLocation();
-        if (loc.getZ() < -15) {
+        if (loc.getZ() < 0) {
             event.setCancelled(false);
             return;
         }
@@ -327,7 +317,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPvP(EntityDamageByEntityEvent event) {
         Location loc = event.getEntity().getLocation();
-        if (loc.getZ() < -15) {
+        if (loc.getZ() < 0) {
             event.setCancelled(false);
             return;
         }

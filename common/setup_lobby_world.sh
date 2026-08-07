@@ -55,8 +55,8 @@ readonly RETRY_DELAY=5
 
 # Spawn coordinates (Central Plaza)
 readonly SPAWN_X="0.5"
-readonly SPAWN_Y="65.0"
-readonly SPAWN_Z="0.5"
+readonly SPAWN_Y="66.0"
+readonly SPAWN_Z="17.5"
 readonly SPAWN_YAW="0.0"
 readonly SPAWN_PITCH="0.0"
 

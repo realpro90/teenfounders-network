@@ -1,6 +1,7 @@
 # ==============================================================================
-# TeenFounders Network - Citizens NPC Configuration
+# TeenFounders Network - Citizens NPC Configuration (FreeBuild2 World)
 # 5 Production Destination NPCs with Holograms & Server Transfer Commands
+# Spawn location: (0.5, 66.0, 17.5)
 # ==============================================================================
 
 npc:
@@ -20,8 +21,8 @@ npc:
     location:
       world: world
       x: 3.5
-      y: 65.0
-      z: 0.5
+      y: 66.0
+      z: 17.5
       yaw: 90.0
       pitch: 0.0
 
@@ -41,8 +42,8 @@ npc:
     location:
       world: world
       x: 0.5
-      y: 65.0
-      z: 3.5
+      y: 66.0
+      z: 20.5
       yaw: 180.0
       pitch: 0.0
 
@@ -61,9 +62,9 @@ npc:
             player: true
     location:
       world: world
-      x: -3.5
-      y: 65.0
-      z: 0.5
+      x: -2.5
+      y: 66.0
+      z: 17.5
       yaw: -90.0
       pitch: 0.0
 
@@ -83,8 +84,8 @@ npc:
     location:
       world: world
       x: 0.5
-      y: 65.0
-      z: -3.5
+      y: 66.0
+      z: 14.5
       yaw: 0.0
       pitch: 0.0
 
@@ -104,7 +105,7 @@ npc:
     location:
       world: world
       x: 2.5
-      y: 65.0
-      z: 2.5
+      y: 66.0
+      z: 19.5
       yaw: -135.0
       pitch: 0.0

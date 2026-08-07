@@ -17,6 +17,7 @@ RUN curl -sSL "https://hub.spigotmc.org/jenkins/job/BungeeCord/lastSuccessfulBui
 COPY proxy/config.yml /proxy/config.yml
 COPY proxy/velocity.toml /proxy/velocity.toml
 COPY proxy/secret.txt /proxy/forwarding.secret
+COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 

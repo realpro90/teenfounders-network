@@ -51,8 +51,8 @@ download_plugin "EssentialsXSpawn" "https://github.com/EssentialsX/Essentials/re
 
 # 3. User Interfaces & Protocol Compatibility
 download_plugin "PlaceholderAPI" "https://cdn.modrinth.com/data/lKEzGugV/versions/pIvQcXW8/PlaceholderAPI-2.12.3.jar" 300000
-download_plugin "ViaVersion" "https://github.com/ViaVersion/ViaVersion/releases/download/5.2.1/ViaVersion-5.2.1.jar" 3000000
-download_plugin "ViaBackwards" "https://github.com/ViaVersion/ViaBackwards/releases/download/5.2.1/ViaBackwards-5.2.1.jar" 1000000
+download_plugin "ViaVersion" "https://github.com/ViaVersion/ViaVersion/releases/download/5.11.0/ViaVersion-5.11.0.jar" 3000000
+download_plugin "ViaBackwards" "https://github.com/ViaVersion/ViaBackwards/releases/download/5.11.0/ViaBackwards-5.11.0.jar" 1000000
 download_plugin "TAB" "https://github.com/NEZNAMY/TAB/releases/download/5.0.4/TAB.v5.0.4.jar" 1000000
 download_plugin "DeluxeMenus" "https://cdn.modrinth.com/data/kKZkPgJ7/versions/PNKQ6RMs/DeluxeMenus-1.14.1-Release.jar" 500000
 

@@ -1,0 +1,55 @@
+# ==============================================================================
+# TeenFounders Network - Welcome Guide Book
+# Distributed to new players on join
+# ==============================================================================
+
+Title: TeenFounders Guide
+Author: TeenFounders Network
+
+Page 1:
+&6&lTEENFOUNDERS NETWORK&r
+&8-------------------
+&fWelcome to the premier creative build network for teen entrepreneurs, builders, & creators!
+
+&eWebsite:
+&bhttps://teenfounders.in
+
+&6Open Navigator:
+&fType &e/menu &for right-click your &6Nether Star&f!
+
+Page 2:
+&6&l1. CREATIVE PLOTS&r
+&8-------------------
+&fClaim your own 64x64 plot to build projects & showcase your ideas.
+
+&eCommands:
+&f• &a/p auto &7- Claim a plot
+&f• &a/p home &7- Teleport home
+&f• &a/p add <player> &7- Co-build
+&f• &a/build &f- Open builder tools
+
+&fIncludes full &bWorldEdit&f!
+
+Page 3:
+&6&l2. BUILD CONTESTS&r
+&8-------------------
+&fJoin timed building competitions!
+
+&eFeatures:
+&f• Live themes & plot arenas
+&f• Community judging
+&f• Earn Builder Ranks & Badges!
+
+&fType &e/menu &f-> Select Competition Arena!
+
+Page 4:
+&6&l3. SURVIVAL EVENT&r
+&8-------------------
+&f15-Day Survival Championship!
+
+&eFeatures:
+&f• 15-Day Season Progression
+&f• Day 15 Shrinking Border Battle
+&f• Champion title & Verification Tokens on &bhttps://teenfounders.in&f!
+
+&fType &e/championship &ffor details.

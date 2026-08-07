@@ -57,3 +57,12 @@ protect:
 
 custom-join-message: "&7[&a+&7] &6TeenFounders &7| &f{PLAYER} joined the build network."
 custom-quit-message: "&7[&c-&7] &6TeenFounders &7| &f{PLAYER} left the network."
+
+kit-on-first-join: 'starter'
+
+kits:
+  starter:
+    delay: -1
+    items:
+      - NETHER_STAR 1 name:&6&lSERVER_NAVIGATOR lore:&7Right-click_to_open_Server_&_World_Navigator!
+      - WRITTEN_BOOK 1 title:&6&lTEENFOUNDERS_GUIDE author:TeenFounders lore:&7Right-click_to_read_network_guide!

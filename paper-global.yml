@@ -1,44 +1,34 @@
-# TeenFounders Build Network - Paper Global Configurations (Paper 1.21.11)
-# Optimized for low latency, fast logins, async chunk loading, and stability on Railway
+# ==============================================================================
+# TeenFounders Network - PaperMC Global Configuration Template
+# Enables BungeeCord IP & Profile Forwarding for proxy connectivity
+# ==============================================================================
 
 _version: 30
 
-async-chunks:
-  threads: 4
-
-chunk-loading:
-  global-max-chunk-send-per-tick: 10
-  player-max-concurrent-loads: 10
-  player-max-chunk-load-queue-size: 80
-  target-background-threads: 2
-
-item-validation:
-  display-name: 8192
-  loc-name: 8192
-  lore-line: 8192
-
-logging:
-  deobfuscate-stacktraces: true
-  log-player-ip-addresses: true
+proxies:
+  bungeecord:
+    online-mode: false
+  velocity:
+    enabled: false
+    online-mode: false
+    secret: ""
 
 messages:
   kick:
-    authentication-servers-down: "§c[TeenFounders] Minecraft authentication servers are down. Please try again later!"
-    connection-throttle: "§c[TeenFounders] Connection throttled. Please wait a few seconds before reconnecting."
+    authentication-servers-down: "§c[TeenFounders] Authentication servers are down. Please try again later."
+    connection-throttle: "§c[TeenFounders] Connection throttled. Please wait a moment."
+    flying-player: "§c[TeenFounders] Flying is not enabled on this server."
+    flying-vehicle: "§c[TeenFounders] Flying is not enabled on this server."
 
-packet-limiter:
-  kick-message: "§c[TeenFounders] Sent too many packets! Connection closed for security."
-  limits:
-    all:
-      interval: 7.0
-      max-packet-rate: 500.0
+unsupported-settings:
+  allow-piston-duplication: false
+  perform-username-validation: false
 
-proxies:
-  bungeecord:
-    online-mode: true
-  velocity:
-    enabled: false
+chunk-loading:
+  min-load-radius: 2
+  max-concurrent-sends: 2
+  autoconfig-send-distance: true
 
 watchdog:
-  early-warning-delay: 10000
   early-warning-every: 5000
+  early-warning-delay: 10000

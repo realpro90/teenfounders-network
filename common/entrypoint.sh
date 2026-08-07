@@ -17,6 +17,8 @@ echo "                 Server Name: ${SERVER_NAME:-backend}                 "
 echo "======================================================================"
 
 mkdir -p "$DATA_DIR"
+mkdir -p "$DATA_DIR/config"
+mkdir -p "$DATA_DIR/plugins"
 cd "$DATA_DIR"
 
 # 1. Accept EULA automatically
@@ -42,12 +44,27 @@ if [ -d "/server/config_templates" ]; then
     cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
 fi
 
-# 5. Invoke Plugin Downloader Script
+# 5. Force enable BungeeCord forwarding in spigot.yml
+cat << 'EOF' > "$DATA_DIR/spigot.yml"
+config-version: 12
+
+settings:
+  bungeecord: true
+
+messages:
+  whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
+  unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
+  server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
+  outdated-client: "§c[TeenFounders] Outdated client! Please use Minecraft Java Edition 1.21.11."
+  outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
+EOF
+
+# 6. Invoke Plugin Downloader Script
 if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 6. Aikar's High-Performance G1GC JVM Flags
+# 7. Aikar's High-Performance G1GC JVM Flags
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

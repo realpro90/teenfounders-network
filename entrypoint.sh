@@ -17,6 +17,8 @@ echo "                 Website: https://teenfounders.in                     "
 echo "======================================================================"
 
 mkdir -p "$DATA_DIR"
+mkdir -p "$DATA_DIR/config"
+mkdir -p "$DATA_DIR/plugins"
 cd "$DATA_DIR"
 
 # 1. Accept EULA automatically
@@ -34,20 +36,32 @@ if [ ! -f "$JAR_FILE" ] || [ $(wc -c <"$JAR_FILE" 2>/dev/null || echo 0) -lt 100
 fi
 
 # 3. Synchronize configuration files from default repo templates
-mkdir -p "$DATA_DIR/plugins"
-mkdir -p "$DATA_DIR/config"
-
 if [ -d "/server/config_templates" ]; then
     echo "[TF-INIT] Syncing server configuration templates..."
     cp -rn /server/config_templates/* "$DATA_DIR/" 2>/dev/null || true
 fi
 
-# 4. Invoke Plugin Downloader
+# 4. Force enable BungeeCord forwarding in spigot.yml
+cat << 'EOF' > "$DATA_DIR/spigot.yml"
+config-version: 12
+
+settings:
+  bungeecord: true
+
+messages:
+  whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
+  unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
+  server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
+  outdated-client: "§c[TeenFounders] Outdated client! Please use Minecraft Java Edition 1.21.11."
+  outdated-server: "§c[TeenFounders] Outdated server! Server is running 1.21.11."
+EOF
+
+# 5. Invoke Plugin Downloader
 if [ -f "/server/scripts/download-plugins.sh" ]; then
     /bin/bash /server/scripts/download-plugins.sh "$DATA_DIR/plugins"
 fi
 
-# 5. Overwrite dynamic environment variables in server.properties if present
+# 6. Overwrite dynamic environment variables in server.properties if present
 if [ -f "$DATA_DIR/server.properties" ]; then
     if [ -n "$MOTD" ]; then
         sed -i "s/^motd=.*/motd=${MOTD}/" "$DATA_DIR/server.properties"
@@ -66,7 +80,7 @@ if [ -f "$DATA_DIR/server.properties" ]; then
     fi
 fi
 
-# 6. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
+# 7. Aikar's High-Performance G1GC JVM Flags for Java 21 & PaperMC
 JVM_FLAGS=(
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

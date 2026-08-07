@@ -29,5 +29,5 @@ COPY proxy/server-icon.png /proxy/server-icon.png
 
 EXPOSE 25565/tcp
 
-# Run BungeeCord with 30s connection timeout (-Dbungee.timeout=30000) for 100% reliable Railway mesh handshake
-ENTRYPOINT ["java", "-Djava.net.preferIPv6Addresses=true", "-Djava.net.preferIPv4Stack=false", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]
+# Run BungeeCord with Java 21 native dual-stack Happy Eyeballs resolution & 30s connection timeout
+ENTRYPOINT ["java", "-Dbungee.timeout=30000", "-Dnet.md_5.bungee.protocol.timeout=30000", "-Xms1G", "-Xmx1G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-jar", "proxy.jar"]

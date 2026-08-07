@@ -190,8 +190,6 @@ fi
 # ─── Step 11: Launch Server ──────────────────────────────────────────────────
 
 JVM_FLAGS=(
-    # Railway IPv4 networking — 100% reliable Mojang CDN downloads & proxy mesh connection
-    "-Djava.net.preferIPv4Stack=true"
     # Memory
     "-Xms${MEMORY}"
     "-Xmx${MEMORY}"

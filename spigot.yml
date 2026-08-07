@@ -3,6 +3,9 @@
 
 config-version: 12
 
+settings:
+  bungeecord: true
+
 messages:
   whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
   unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."

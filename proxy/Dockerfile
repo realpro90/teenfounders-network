@@ -11,9 +11,10 @@ RUN apk add --no-cache curl jq bash netcat-openbsd ca-certificates tzdata
 
 WORKDIR /proxy
 
-# Download Proxy engine build (25.5MB)
+# Download Proxy engine build (BungeeCord / Waterfall)
 RUN curl -sSL "https://hub.spigotmc.org/jenkins/job/BungeeCord/lastSuccessfulBuild/artifact/bootstrap/target/BungeeCord.jar" -o /proxy/proxy.jar
 
+COPY proxy/config.yml /proxy/config.yml
 COPY proxy/velocity.toml /proxy/velocity.toml
 COPY proxy/secret.txt /proxy/forwarding.secret
 

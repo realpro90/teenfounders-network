@@ -33,31 +33,25 @@ echo -e "  ${C_CYAN}▸${C_RESET} Server Name:  ${C_BOLD}${SERVER_NAME}${C_RESET
 echo -e "  ${C_CYAN}▸${C_RESET} Data Dir:     ${DATA_DIR}"
 echo -e "  ${C_CYAN}▸${C_RESET} Java Memory:  ${JAVA_MEMORY}"
 
-# ─── Step 1: Force overwrite all repository plugins over /data/plugins/ ──────
-if [[ -d "/server/plugins" ]]; then
-    echo -e "  ${C_CYAN}▸${C_RESET} Overwriting /data/plugins with repository jars..."
-    cp -f /server/plugins/*.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
-    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins forced into ${DATA_DIR}/plugins/"
-fi
-
-# ─── Step 2: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
+# ─── Step 1: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
 if [[ -f "/server/paper-global.yml" ]]; then
     cp -f /server/paper-global.yml "${DATA_DIR}/config/paper-global.yml" 2>/dev/null || true
     cp -f /server/paper-global.yml "${DATA_DIR}/paper-global.yml" 2>/dev/null || true
     echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml synced (enforce-secure-profile: false)"
 fi
 
-# ─── Step 3: Accept EULA ─────────────────────────────────────────────────────
+# ─── Step 2: Accept EULA ─────────────────────────────────────────────────────
 echo "eula=true" > "${DATA_DIR}/eula.txt"
 echo -e "  ${C_GREEN}✓${C_RESET} Minecraft EULA accepted"
 
-# ─── Step 4: Verified Shared Plugins Sync ────────────────────────────────────
+# ─── Step 3: Download Shared Verified Plugins ────────────────────────────────
 if [[ -f "/server/scripts/download-plugins.sh" ]]; then
     /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
 fi
 
-# Force re-copy custom jars after download-plugins.sh
+# ─── Step 4: OVERWRITE WITH REPOSITORY PLUGINS (TeenFoundersLobby, FreedomChat, SkinsRestorer) ─
 if [[ -d "/server/plugins" ]]; then
+    echo -e "  ${C_CYAN}▸${C_RESET} Force copying repository plugins into ${DATA_DIR}/plugins/..."
     cp -f /server/plugins/*.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
     if [[ -f "/server/plugins/TAB/config.yml" ]]; then
         mkdir -p "${DATA_DIR}/plugins/TAB"
@@ -66,7 +60,7 @@ if [[ -d "/server/plugins" ]]; then
     if [[ -f "/server/ops.json" ]]; then
         cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
     fi
-    echo -e "  ${C_GREEN}✓${C_RESET} Custom server plugins & ops.json force-synced"
+    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins (TeenFoundersLobby, FreedomChat, SkinsRestorer) forced into ${DATA_DIR}/plugins/"
 fi
 
 if [[ -d "/server/config_templates" ]]; then

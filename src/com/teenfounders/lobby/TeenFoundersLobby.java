@@ -10,9 +10,6 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
@@ -33,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -79,17 +77,17 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Set spawn to FreeMap8 top island plaza facing forward (0.5, 90.0, 0.5, Yaw: 0.0f, Pitch: 0.0f)
-            spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
-            world.setSpawnLocation(0, 90, 0);
+            // Reference spawn location from player screenshot: X: -1.8, Y: 90.0, Z: -4.5
+            spawnLocation = new Location(world, -1.8, 90.0, -4.5, 0.0f, 0.0f);
+            world.setSpawnLocation(-1, 90, -4);
 
             // Clean PhoenixSoldier board signs from map
             purgePhoenixSoldierBoard(world);
 
-            // Spawn NPCs after chunks load
+            // Initial NPC spawn
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
             
-            // Repeating task to ensure NPCs remain persistent and TAB list stays branded
+            // Repeating task to keep NPCs visible, persistent, and TAB list branded
             Bukkit.getScheduler().runTaskTimer(this, () -> {
                 spawnLobbyNPCs(world);
                 for (Player p : Bukkit.getOnlinePlayers()) {
@@ -98,7 +96,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             }, 200L, 200L);
         }
 
-        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 90.0, 0.5, Yaw: 0.0f).");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! Spawn active at (-1.8, 90.0, -4.5).");
     }
 
     private void configureWorld(World world) {
@@ -122,6 +120,16 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         try {
             player.sendPlayerListHeaderAndFooter(net.kyori.adventure.text.Component.text(header), net.kyori.adventure.text.Component.text(footer));
         } catch (Exception ignored) {}
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        // Bypass chat signature enforcement by broadcasting server formatted system message
+        Player player = event.getPlayer();
+        String msg = event.getMessage();
+        String formatted = "§7[§aMember§7] §f" + player.getDisplayName() + ": §7" + msg;
+        Bukkit.broadcastMessage(formatted);
+        event.setCancelled(true);
     }
 
     private void purgeMobs(World world) {
@@ -166,7 +174,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             }
         }
 
-        // Purge text displays or armor stands with credit text
         for (Entity e : world.getEntities()) {
             String name = e.getCustomName();
             if (name != null) {
@@ -180,20 +187,21 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     public void spawnLobbyNPCs(World world) {
         if (world == null) return;
-        double sx = 0.5;
+        // Reference coordinates from player screenshot: X: -1.8, Y: 90.0, Z: -4.5
+        double sx = -1.8;
         double sy = 90.0;
-        double sz = 0.5;
+        double sz = -4.5;
 
-        // 1. Creative Plots Master (X + 4.0) - facing West (yaw = 90.0f)
-        createNPC(world, new Location(world, sx + 4.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
+        // 1. Creative Plots Master (X + 3.0 = 1.2, Z = -4.5) - facing West (yaw = 90.0f)
+        createNPC(world, new Location(world, sx + 3.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
-        // 2. Survival Event Champion (X - 3.0) - facing East (yaw = -90.0f)
+        // 2. Survival Event Champion (X - 3.0 = -4.8, Z = -4.5) - facing East (yaw = -90.0f)
         createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
-        // 3. Build Offs Judge (Z + 4.0) - facing North (yaw = 180.0f)
-        createNPC(world, new Location(world, sx, sy, sz + 4.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
+        // 3. Build Offs Judge (Z + 3.0 = -1.5, X = -1.8) - facing North (yaw = 180.0f)
+        createNPC(world, new Location(world, sx, sy, sz + 3.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
-        // 4. PvP Gladiator (Z - 3.0) - facing South (yaw = 0.0f)
+        // 4. PvP Gladiator (Z - 3.0 = -7.5, X = -1.8) - facing South (yaw = 0.0f)
         createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
@@ -296,7 +304,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         player.sendMessage("§6§m--------------------------------------------------");
         player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Top Island Spawn active at (0.5, 90.0, 0.5).");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Spawn active at (-1.8, 90.0, -4.5).");
         player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
         player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
         player.sendMessage("  §7Website: §eteenfounders.in");
@@ -348,7 +356,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
             player.sendTitle("§6§lCONNECTING...", "§fSwitching to " + target.toUpperCase() + " server", 5, 40, 10);
             
-            // Send BungeeCord plugin message to connect player to target server
             try {
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b);
@@ -430,7 +437,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
         
-        // Void protection threshold
         if (loc.getY() < 40) {
             teleportToSpawn(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
@@ -449,14 +455,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
-        // Complete fall damage negation anywhere in lobby
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(true);
             return;
         }
 
         Location loc = event.getEntity().getLocation();
-        if (loc.getZ() < 0 && event.getCause() != EntityDamageEvent.DamageCause.FALL) {
+        if (loc.getZ() < -15 && event.getCause() != EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(false);
             return;
         }
@@ -472,7 +477,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
 
         Location loc = entity.getLocation();
-        if (loc.getZ() < 0) {
+        if (loc.getZ() < -15) {
             event.setCancelled(false);
             return;
         }
@@ -500,7 +505,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             if (meta != null && meta.getPersistentDataContainer().has(itemKey, PersistentDataType.STRING)) {
                 String id = meta.getPersistentDataContainer().get(itemKey, PersistentDataType.STRING);
                 
-                // Left click and Right click support for all hotbar tools
                 if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     event.setCancelled(true);
                     if (isClickCooldown(player)) return;

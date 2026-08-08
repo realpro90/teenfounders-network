@@ -34,9 +34,9 @@ log_pings: false
 connection_throttle: -1
 connection_throttle_limit: 0
 prevent_proxy_connections: false
-timeout: 5000
-server_connect_timeout: 5000
-remote_ping_timeout: 5000
+timeout: 30000
+server_connect_timeout: 15000
+remote_ping_timeout: 10000
 player_limit: -1
 ip_forward: true
 online_mode: false

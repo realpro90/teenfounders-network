@@ -41,7 +41,7 @@ rm -f "${DATA_DIR}/plugins/SkinsRestorer-*.jar"
 if [[ -f "/server/paper-global.yml" ]]; then
     cp -f /server/paper-global.yml "${DATA_DIR}/config/paper-global.yml" 2>/dev/null || true
     cp -f /server/paper-global.yml "${DATA_DIR}/paper-global.yml" 2>/dev/null || true
-    echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml synced (enforce-secure-profile: false)"
+    echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml synced (settings.enforce-secure-profile: false)"
 fi
 
 # ─── Step 2: Accept EULA ─────────────────────────────────────────────────────
@@ -111,9 +111,9 @@ fi
 # ─── Step 6: FINAL OVERWRITE WITH REPOSITORY PLUGINS RIGHT BEFORE ENGINE LAUNCH ─
 if [[ -d "/server/plugins" ]]; then
     echo -e "  ${C_CYAN}▸${C_RESET} Force copying repository plugins into ${DATA_DIR}/plugins/..."
-    cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
     cp -f /server/plugins/FreedomChat.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
     cp -f /server/plugins/SkinsRestorer.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
     if [[ -f "/server/plugins/TAB/config.yml" ]]; then
         mkdir -p "${DATA_DIR}/plugins/TAB"
         cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
@@ -121,7 +121,19 @@ if [[ -d "/server/plugins" ]]; then
     if [[ -f "/server/ops.json" ]]; then
         cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
     fi
-    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins (TeenFoundersLobby, FreedomChat, SkinsRestorer) forced into ${DATA_DIR}/plugins/"
+    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins forced into ${DATA_DIR}/plugins/"
+fi
+
+# Compile fresh TeenFoundersLobby plugin if source is available
+if [[ -f "/server/src/com/teenfounders/lobby/TeenFoundersLobby.java" ]]; then
+    echo -e "  ${C_CYAN}▸${C_RESET} Compiling fresh TeenFoundersLobby.jar..."
+    mkdir -p /tmp/tf_lobby_build
+    cp_jars=$(find "${DATA_DIR}/plugins" -name "*.jar" | tr '\n' ':')
+    if javac -cp "${cp_jars}" -d /tmp/tf_lobby_build /server/src/com/teenfounders/lobby/TeenFoundersLobby.java 2>/dev/null; then
+        cp /server/src/plugin.yml /tmp/tf_lobby_build/plugin.yml 2>/dev/null || true
+        jar -cf "${DATA_DIR}/plugins/TeenFoundersLobby.jar" -C /tmp/tf_lobby_build . 2>/dev/null || true
+        echo -e "  ${C_GREEN}✓${C_RESET} TeenFoundersLobby.jar freshly compiled & installed!"
+    fi
 fi
 
 if [[ -d "/server/config_templates" ]]; then

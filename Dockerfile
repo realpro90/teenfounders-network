@@ -4,7 +4,7 @@
 # ║  © 2026 TeenFounders · https://teenfounders.in                            ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jdk-alpine
 
 # ─── Environment ─────────────────────────────────────────────────────────────
 ENV PAPER_VERSION="1.21.4" \
@@ -38,6 +38,8 @@ COPY scripts/         /server/scripts/
 COPY lobby/           /server/lobby/
 COPY plugins/         /server/plugins/
 COPY config_templates/ /server/config_templates/
+COPY src/             /server/src/
+COPY paper-global.yml /server/paper-global.yml
 
 # ─── Permissions & Pre-Cache Plugins ──────────────────────────────────────────
 RUN chmod +x /server/entrypoint.sh \

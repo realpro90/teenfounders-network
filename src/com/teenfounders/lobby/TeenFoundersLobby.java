@@ -202,13 +202,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         loc.getChunk().load(true);
         loc.getChunk().setForceLoaded(true);
 
-        Villager villagerNPC = null;
+        Villager npc = null;
         ArmorStand holoNPC = null;
 
         for (Entity e : world.getEntities()) {
             if (e instanceof Villager v) {
                 if (name.equals(v.getCustomName())) {
-                    villagerNPC = v;
+                    npc = v;
                 }
             } else if (e instanceof ArmorStand a) {
                 if (subtitle.equals(a.getCustomName())) {
@@ -217,26 +217,26 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             }
         }
 
-        if (villagerNPC == null || !villagerNPC.isValid()) {
-            villagerNPC = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
-            villagerNPC.setCustomName(name);
-            villagerNPC.setCustomNameVisible(true);
+        if (npc == null || !npc.isValid()) {
+            npc = world.spawn(loc, Villager.class);
+            npc.setCustomName(name);
+            npc.setCustomNameVisible(true);
         }
         
-        villagerNPC.teleport(loc);
-        villagerNPC.setProfession(Villager.Profession.LIBRARIAN);
-        villagerNPC.setVillagerType(Villager.Type.PLAINS);
-        villagerNPC.setAI(false);
-        villagerNPC.setInvulnerable(true);
-        villagerNPC.setSilent(true);
-        villagerNPC.setCollidable(false);
-        villagerNPC.setPersistent(true);
-        villagerNPC.setRemoveWhenFarAway(false);
-        villagerNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+        npc.teleport(loc);
+        npc.setProfession(Villager.Profession.LIBRARIAN);
+        npc.setVillagerType(Villager.Type.PLAINS);
+        npc.setAI(false);
+        npc.setInvulnerable(true);
+        npc.setSilent(true);
+        npc.setCollidable(false);
+        npc.setPersistent(true);
+        npc.setRemoveWhenFarAway(false);
+        npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
 
         Location holoLoc = loc.clone().add(0, 2.2, 0);
         if (holoNPC == null || !holoNPC.isValid()) {
-            holoNPC = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
+            holoNPC = world.spawn(holoLoc, ArmorStand.class);
             holoNPC.setCustomName(subtitle);
             holoNPC.setCustomNameVisible(true);
         }
@@ -262,19 +262,19 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         Entity pet = null;
         if (petType == 0) {
-            Wolf wolf = (Wolf) world.spawnEntity(loc, EntityType.WOLF);
+            Wolf wolf = world.spawn(loc, Wolf.class);
             wolf.setOwner(player);
             wolf.setTamed(true);
             wolf.setCustomName("§6§l" + player.getName() + "'s Companion Wolf");
             pet = wolf;
         } else if (petType == 1) {
-            Cat cat = (Cat) world.spawnEntity(loc, EntityType.CAT);
+            Cat cat = world.spawn(loc, Cat.class);
             cat.setOwner(player);
             cat.setTamed(true);
             cat.setCustomName("§b§l" + player.getName() + "'s Mystic Cat");
             pet = cat;
         } else {
-            Fox fox = (Fox) world.spawnEntity(loc, EntityType.FOX);
+            Fox fox = world.spawn(loc, Fox.class);
             fox.setCustomName("§e§l" + player.getName() + "'s Founder Fox");
             pet = fox;
         }

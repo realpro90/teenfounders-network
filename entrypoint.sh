@@ -39,11 +39,30 @@ rm -f "${DATA_DIR}/plugins/SkinsRestorer-*.jar"
 rm -f "${DATA_DIR}/plugins/WorldGuard.jar"
 
 # ─── Step 1: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
-if [[ -f "/server/paper-global.yml" ]]; then
-    cp -f /server/paper-global.yml "${DATA_DIR}/config/paper-global.yml" 2>/dev/null || true
-    cp -f /server/paper-global.yml "${DATA_DIR}/paper-global.yml" 2>/dev/null || true
-    echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml synced (settings.enforce-secure-profile: false)"
-fi
+cat > "${DATA_DIR}/config/paper-global.yml" << 'YAML'
+_version: 28
+proxies:
+  bungeecord:
+    online-mode: false
+  velocity:
+    enabled: false
+    online-mode: false
+    secret: ""
+settings:
+  enforce-secure-profile: false
+  log-player-ip-addresses: false
+YAML
+
+cp -f "${DATA_DIR}/config/paper-global.yml" "${DATA_DIR}/paper-global.yml" 2>/dev/null || true
+
+cat > "${DATA_DIR}/purpur.yml" << 'YAML'
+verbose: false
+config-version: 36
+settings:
+  enforce-secure-profile: false
+YAML
+
+echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml & purpur.yml written (enforce-secure-profile: false)"
 
 # ─── Step 2: Accept EULA ─────────────────────────────────────────────────────
 echo "eula=true" > "${DATA_DIR}/eula.txt"

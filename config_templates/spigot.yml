@@ -5,6 +5,7 @@ config-version: 12
 
 settings:
   bungeecord: true
+  connection-throttle: -1
   moved-too-quickly-multiplier: 100.0
   moved-wrongly-threshold: 100.0
 

@@ -31,7 +31,8 @@ permissions:
   - bungeecord.command.reload
 
 log_pings: false
-connection_throttle_limit: 3
+connection_throttle: -1
+connection_throttle_limit: 0
 prevent_proxy_connections: false
 timeout: 60000
 server_connect_timeout: 60000

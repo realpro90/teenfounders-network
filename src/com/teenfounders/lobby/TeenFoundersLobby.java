@@ -67,15 +67,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Set spawn to FreeMap8 plaza (0.5, 65.0, 0.5)
-            spawnLocation = new Location(world, 0.5, 65.0, 0.5, 0.0f, 0.0f);
-            world.setSpawnLocation(0, 65, 0);
+            // Set spawn to FreeMap8 top island plaza (0.5, 90.0, 0.5)
+            spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
+            world.setSpawnLocation(0, 90, 0);
 
             // Spawn NPCs after chunks load
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
         }
 
-        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 65.0, 0.5).");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 90.0, 0.5).");
     }
 
     private void configureWorld(World world) {
@@ -107,7 +107,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     public void spawnLobbyNPCs(World world) {
         if (world == null) return;
         double sx = 0.5;
-        double sy = 65.0;
+        double sy = 90.0;
         double sz = 0.5;
 
         // 1. Creative Plots Master (X + 3.5)

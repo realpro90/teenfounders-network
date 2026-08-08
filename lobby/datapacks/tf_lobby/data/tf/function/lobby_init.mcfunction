@@ -1,6 +1,6 @@
 # ══════════════════════════════════════════════════════════════════
 # TeenFounders Build Network — Lobby Initialisation
-# Runs once on world load. Builds the central plaza & structures.
+# Runs once on world load for FreeMap8
 # ══════════════════════════════════════════════════════════════════
 
 # --- Announce ---
@@ -34,13 +34,9 @@ time set 6000
 worldborder center 0 0
 worldborder set 500
 
-# --- Set spawn ---
-setworldspawn 0 65 0
+# --- Set spawn to top floating island (0 90 0) ---
+setworldspawn 0 90 0
 
-# --- Build the lobby ---
-function tf:build_plaza
-function tf:build_portals
-function tf:build_decorations
 function tf:setup_spawn_experience
 
-say §6§l[TeenFounders] §a✓ §fLobby build complete!
+say §6§l[TeenFounders] §a✓ §fFreeMap8 Lobby complete!

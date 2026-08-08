@@ -53,27 +53,7 @@ if [[ -f "/server/scripts/download-plugins.sh" ]]; then
     /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
 fi
 
-# ─── Step 4: FORCE OVERWRITE CUSTOM REPOSITORY PLUGINS ───────────────────────
-if [[ -d "/server/plugins" ]]; then
-    echo -e "  ${C_CYAN}▸${C_RESET} Force copying repository plugins into ${DATA_DIR}/plugins/..."
-    cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
-    cp -f /server/plugins/FreedomChat.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
-    cp -f /server/plugins/SkinsRestorer.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
-    if [[ -f "/server/plugins/TAB/config.yml" ]]; then
-        mkdir -p "${DATA_DIR}/plugins/TAB"
-        cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
-    fi
-    if [[ -f "/server/ops.json" ]]; then
-        cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
-    fi
-    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins (TeenFoundersLobby, FreedomChat, SkinsRestorer) forced into ${DATA_DIR}/plugins/"
-fi
-
-if [[ -d "/server/config_templates" ]]; then
-    cp -rn /server/config_templates/* "${DATA_DIR}/" 2>/dev/null || true
-fi
-
-# ─── Step 5: Download & Validate Server Engine ──────────────────────────────
+# ─── Step 4: Download & Validate Server Engine ──────────────────────────────
 JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
@@ -104,7 +84,7 @@ else
     echo -e "  ${C_GREEN}✓${C_RESET} Engine already cached ($(du -h "${JAR_FILE}" | awk '{print $1}'))"
 fi
 
-# ─── Step 6: Provision Lobby World (lobby server only) ───────────────────────
+# ─── Step 5: Provision Lobby World (lobby server only) ───────────────────────
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
     export TF_FORCE_REINSTALL=1
 
@@ -126,6 +106,26 @@ if [[ -f "${DATA_DIR}/server.properties" ]]; then
     else
         echo "enforce-secure-profile=false" >> "${DATA_DIR}/server.properties"
     fi
+fi
+
+# ─── Step 6: FINAL OVERWRITE WITH REPOSITORY PLUGINS RIGHT BEFORE ENGINE LAUNCH ─
+if [[ -d "/server/plugins" ]]; then
+    echo -e "  ${C_CYAN}▸${C_RESET} Force copying repository plugins into ${DATA_DIR}/plugins/..."
+    cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/FreedomChat.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/SkinsRestorer.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    if [[ -f "/server/plugins/TAB/config.yml" ]]; then
+        mkdir -p "${DATA_DIR}/plugins/TAB"
+        cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
+    fi
+    if [[ -f "/server/ops.json" ]]; then
+        cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
+    fi
+    echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins (TeenFoundersLobby, FreedomChat, SkinsRestorer) forced into ${DATA_DIR}/plugins/"
+fi
+
+if [[ -d "/server/config_templates" ]]; then
+    cp -rn /server/config_templates/* "${DATA_DIR}/" 2>/dev/null || true
 fi
 
 # ─── Step 7: Launch Paper/Purpur Server Engine ──────────────────────────────

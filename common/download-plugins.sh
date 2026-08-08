@@ -49,7 +49,7 @@ download_plugin "ProtocolLib" "https://github.com/dmulloy2/ProtocolLib/releases/
 # 2. Essentials Suite & Player Systems
 download_plugin "EssentialsX" "https://github.com/EssentialsX/Essentials/releases/download/2.20.1/EssentialsX-2.20.1.jar" 3000000
 download_plugin "EssentialsXSpawn" "https://github.com/EssentialsX/Essentials/releases/download/2.20.1/EssentialsXSpawn-2.20.1.jar" 15000
-download_plugin "SkinsRestorer" "https://github.com/SkinsRestorer/SkinsRestorer/releases/download/15.0.3/SkinsRestorer.jar" 1000000
+download_plugin "SkinsRestorer" "https://cdn.modrinth.com/data/TsLS8Py5/versions/wXS6bHiC/SkinsRestorer.jar" 1000000
 
 # 3. User Interfaces & Protocol Compatibility
 download_plugin "PlaceholderAPI" "https://cdn.modrinth.com/data/lKEzGugV/versions/pIvQcXW8/PlaceholderAPI-2.12.3.jar" 300000

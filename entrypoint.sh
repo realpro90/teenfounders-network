@@ -33,9 +33,10 @@ echo -e "  ${C_CYAN}▸${C_RESET} Server Name:  ${C_BOLD}${SERVER_NAME}${C_RESET
 echo -e "  ${C_CYAN}▸${C_RESET} Data Dir:     ${DATA_DIR}"
 echo -e "  ${C_CYAN}▸${C_RESET} Java Memory:  ${JAVA_MEMORY}"
 
-# Purge any old/stale SkinsRestorer.jar from persistent volume
+# Purge any old/stale SkinsRestorer.jar or WorldGuard.jar from persistent volume
 rm -f "${DATA_DIR}/plugins/SkinsRestorer.jar"
 rm -f "${DATA_DIR}/plugins/SkinsRestorer-*.jar"
+rm -f "${DATA_DIR}/plugins/WorldGuard.jar"
 
 # ─── Step 1: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
 if [[ -f "/server/paper-global.yml" ]]; then

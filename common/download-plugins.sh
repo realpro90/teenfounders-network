@@ -61,7 +61,6 @@ download_plugin "DeluxeMenus" "https://cdn.modrinth.com/data/kKZkPgJ7/versions/P
 # 4. Production Management & Protection
 download_plugin "CoreProtect" "https://cdn.modrinth.com/data/Lu3KuzdV/versions/Kma0kBsY/CoreProtect-CE-24.0.jar" 300000
 download_plugin "WorldEdit" "https://cdn.modrinth.com/data/1u6JkXh5/versions/qNuPcliz/worldedit-bukkit-7.4.4.jar" 4000000
-download_plugin "WorldGuard" "https://cdn.modrinth.com/data/DKY9btbd/versions/btHBavWa/worldguard-bukkit-7.0.18.jar" 1000000
 download_plugin "Multiverse-Core" "https://github.com/Multiverse/Multiverse-Core/releases/download/4.3.12/Multiverse-Core-4.3.12.jar" 1000000
 download_plugin "Chunky" "https://cdn.modrinth.com/data/fALzjamp/versions/K87K9v0Y/Chunky-Bukkit-1.4.28.jar" 200000
 download_plugin "GrimAC" "https://github.com/GrimAnticheat/Grim/releases/download/2.3.66/GrimAC-2.3.66.jar" 3000000

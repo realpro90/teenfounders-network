@@ -9,7 +9,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
@@ -81,8 +80,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
             world.setSpawnLocation(0, 90, 0);
 
-            // Clean PhoenixSoldier board signs from map
-            purgePhoenixSoldierBoard(world);
+            // Clean signs and player heads from lobby map
+            purgeSignsAndSkulls(world);
 
             // Initial NPC spawn after chunks force loaded
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 20L);
@@ -147,40 +146,34 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    public void purgePhoenixSoldierBoard(World world) {
+    public void purgeSignsAndSkulls(World world) {
         if (world == null) return;
-        int minX = -60, maxX = 60;
+        int minX = -100, maxX = 100;
         int minY = 40, maxY = 120;
-        int minZ = -60, maxZ = 60;
+        int minZ = -100, maxZ = 100;
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     Block block = world.getBlockAt(x, y, z);
-                    if (block.getState() instanceof Sign sign) {
-                        boolean match = false;
-                        for (String line : sign.getSide(org.bukkit.block.sign.Side.FRONT).getLines()) {
-                            String lower = line.toLowerCase();
-                            if (lower.contains("phoenix") || lower.contains("soldier") || lower.contains("build by") || lower.contains("srphoenix")) {
-                                match = true;
-                                break;
-                            }
-                        }
-                        if (match) {
-                            block.setType(Material.AIR);
-                        }
+                    Material m = block.getType();
+                    String mName = m.name();
+                    if (mName.contains("SIGN") || mName.contains("SKULL") || mName.contains("HEAD")) {
+                        block.setType(Material.AIR);
                     }
                 }
             }
         }
 
         for (Entity e : world.getEntities()) {
-            String name = e.getCustomName();
-            if (name != null) {
-                String lower = name.toLowerCase();
-                if (lower.contains("phoenix") || lower.contains("soldier") || lower.contains("build by") || lower.contains("srphoenix")) {
-                    e.remove();
+            if (e.getType() == EntityType.ARMOR_STAND && !e.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+                String name = e.getCustomName();
+                if (name != null && (name.contains("BUILD MASTER") || name.contains("SURVIVAL CHAMPION") || name.contains("BUILD OFFS JUDGE") || name.contains("PVP GLADIATOR"))) {
+                    continue;
                 }
+                e.remove();
+            } else if (e.getType() == EntityType.ITEM_FRAME) {
+                e.remove();
             }
         }
     }
@@ -286,7 +279,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         World world = player.getWorld();
         purgeMobs(world);
-        purgePhoenixSoldierBoard(world);
+        purgeSignsAndSkulls(world);
         spawnLobbyNPCs(world);
 
         teleportToSpawn(player);

@@ -33,6 +33,10 @@ echo -e "  ${C_CYAN}▸${C_RESET} Server Name:  ${C_BOLD}${SERVER_NAME}${C_RESET
 echo -e "  ${C_CYAN}▸${C_RESET} Data Dir:     ${DATA_DIR}"
 echo -e "  ${C_CYAN}▸${C_RESET} Java Memory:  ${JAVA_MEMORY}"
 
+# Purge any old/stale SkinsRestorer.jar from persistent volume
+rm -f "${DATA_DIR}/plugins/SkinsRestorer.jar"
+rm -f "${DATA_DIR}/plugins/SkinsRestorer-*.jar"
+
 # ─── Step 1: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
 if [[ -f "/server/paper-global.yml" ]]; then
     cp -f /server/paper-global.yml "${DATA_DIR}/config/paper-global.yml" 2>/dev/null || true
@@ -49,10 +53,12 @@ if [[ -f "/server/scripts/download-plugins.sh" ]]; then
     /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
 fi
 
-# ─── Step 4: OVERWRITE WITH REPOSITORY PLUGINS (TeenFoundersLobby, FreedomChat, SkinsRestorer) ─
+# ─── Step 4: FORCE OVERWRITE CUSTOM REPOSITORY PLUGINS ───────────────────────
 if [[ -d "/server/plugins" ]]; then
     echo -e "  ${C_CYAN}▸${C_RESET} Force copying repository plugins into ${DATA_DIR}/plugins/..."
-    cp -f /server/plugins/*.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/FreedomChat.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
+    cp -f /server/plugins/SkinsRestorer.jar "${DATA_DIR}/plugins/" 2>/dev/null || true
     if [[ -f "/server/plugins/TAB/config.yml" ]]; then
         mkdir -p "${DATA_DIR}/plugins/TAB"
         cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true

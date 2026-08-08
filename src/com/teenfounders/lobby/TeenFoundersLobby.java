@@ -83,8 +83,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             // Clean signs and player heads from lobby map
             purgeSignsAndSkulls(world);
 
-            // Initial NPC spawn after chunks force loaded
-            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 20L);
+            // Initial NPC spawn
+            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 10L);
             
             // Repeating task to keep NPCs visible, persistent, and TAB list branded
             Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -92,7 +92,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     updatePlayerTablist(p);
                 }
-            }, 100L, 100L);
+            }, 60L, 60L);
         }
 
         getLogger().info("TeenFoundersLobby v6.0 enabled! Plaza Spawn active at (0.5, 90.0, 0.5).");
@@ -135,7 +135,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         for (Entity entity : world.getEntities()) {
             if (entity instanceof Slime) {
                 entity.remove();
-            } else if (entity instanceof Mob) {
+            } else if (entity instanceof Mob && !(entity instanceof Villager)) {
                 if (!entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING)) {
                     String customName = entity.getCustomName();
                     if (customName == null || (!customName.contains("BUILD MASTER") && !customName.contains("SURVIVAL CHAMPION") && !customName.contains("BUILD OFFS JUDGE") && !customName.contains("PVP GLADIATOR"))) {
@@ -166,9 +166,9 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
 
         for (Entity e : world.getEntities()) {
-            if (e.getType() == EntityType.ARMOR_STAND && !e.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+            if (e.getType() == EntityType.ARMOR_STAND) {
                 String name = e.getCustomName();
-                if (name != null && (name.contains("BUILD MASTER") || name.contains("SURVIVAL CHAMPION") || name.contains("BUILD OFFS JUDGE") || name.contains("PVP GLADIATOR"))) {
+                if (name != null && (name.contains("Creative Plots") || name.contains("15-Day Survival") || name.contains("Build Competition") || name.contains("PvP Arena") || name.contains("BUILD MASTER") || name.contains("SURVIVAL CHAMPION") || name.contains("BUILD OFFS JUDGE") || name.contains("PVP GLADIATOR"))) {
                     continue;
                 }
                 e.remove();
@@ -186,55 +186,71 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sz = 0.5;
 
         // 1. Creative Plots Master (X + 3.5 = 4.0, Z = 0.5) - facing West (yaw = 90.0f)
-        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
+        createOrUpdateNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
         // 2. Survival Event Champion (X - 3.5 = -3.0, Z = 0.5) - facing East (yaw = -90.0f)
-        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
+        createOrUpdateNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
         // 3. Build Offs Judge (Z + 3.5 = 4.0, X = 0.5) - facing North (yaw = 180.0f)
-        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
+        createOrUpdateNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
         // 4. PvP Gladiator (Z - 3.5 = -3.0, X = 0.5) - facing South (yaw = 0.0f)
-        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
+        createOrUpdateNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
-    private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
+    private void createOrUpdateNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
         loc.getChunk().load(true);
         loc.getChunk().setForceLoaded(true);
-        boolean villagerExists = false;
 
-        for (Entity e : world.getNearbyEntities(loc, 2.0, 3.0, 2.0)) {
-            if (e instanceof Villager && name.equals(e.getCustomName())) {
-                villagerExists = true;
-                break;
+        Villager villagerNPC = null;
+        ArmorStand holoNPC = null;
+
+        // Search world entities to find existing Villager & Hologram ArmorStand by custom name
+        for (Entity e : world.getEntities()) {
+            if (e instanceof Villager v) {
+                if (name.equals(v.getCustomName())) {
+                    villagerNPC = v;
+                }
+            } else if (e instanceof ArmorStand a) {
+                if (subtitle.equals(a.getCustomName())) {
+                    holoNPC = a;
+                }
             }
         }
 
-        if (!villagerExists) {
-            Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
-            npc.setCustomName(name);
-            npc.setCustomNameVisible(true);
-            npc.setProfession(Villager.Profession.LIBRARIAN);
-            npc.setVillagerType(Villager.Type.PLAINS);
-            npc.setAI(false);
-            npc.setInvulnerable(true);
-            npc.setSilent(true);
-            npc.setCollidable(false);
-            npc.setPersistent(true);
-            npc.setRemoveWhenFarAway(false);
-            npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
-
-            Location holoLoc = loc.clone().add(0, 2.2, 0);
-            ArmorStand holo = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
-            holo.setCustomName(subtitle);
-            holo.setCustomNameVisible(true);
-            holo.setGravity(false);
-            holo.setCanPickupItems(false);
-            holo.setVisible(false);
-            holo.setMarker(true);
-            holo.setPersistent(true);
-            holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
+        // Configure or Spawn Villager NPC
+        if (villagerNPC == null || !villagerNPC.isValid()) {
+            villagerNPC = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
+            villagerNPC.setCustomName(name);
+            villagerNPC.setCustomNameVisible(true);
         }
+        
+        villagerNPC.teleport(loc);
+        villagerNPC.setProfession(Villager.Profession.LIBRARIAN);
+        villagerNPC.setVillagerType(Villager.Type.PLAINS);
+        villagerNPC.setAI(false);
+        villagerNPC.setInvulnerable(true);
+        villagerNPC.setSilent(true);
+        villagerNPC.setCollidable(false);
+        villagerNPC.setPersistent(true);
+        villagerNPC.setRemoveWhenFarAway(false);
+        villagerNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+
+        // Configure or Spawn Hologram ArmorStand
+        Location holoLoc = loc.clone().add(0, 2.2, 0);
+        if (holoNPC == null || !holoNPC.isValid()) {
+            holoNPC = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
+            holoNPC.setCustomName(subtitle);
+            holoNPC.setCustomNameVisible(true);
+        }
+
+        holoNPC.teleport(holoLoc);
+        holoNPC.setGravity(false);
+        holoNPC.setCanPickupItems(false);
+        holoNPC.setVisible(false);
+        holoNPC.setMarker(true);
+        holoNPC.setPersistent(true);
+        holoNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
     }
 
     private void spawnRandomPet(Player player) {

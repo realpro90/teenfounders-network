@@ -77,7 +77,10 @@ if [[ -d "/server/plugins" ]]; then
         mkdir -p "${DATA_DIR}/plugins/TAB"
         cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
     fi
-    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced & TAB HUD branded"
+    if [[ -f "/server/ops.json" ]]; then
+        cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
+    fi
+    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced & ops.json synced"
 fi
 
 if [[ -d "/server/config_templates" ]]; then

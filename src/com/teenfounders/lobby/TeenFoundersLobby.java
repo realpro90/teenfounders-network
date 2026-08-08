@@ -10,6 +10,9 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
@@ -31,6 +34,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -75,7 +79,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Set spawn to FreeMap8 top island plaza (0.5, 90.0, 0.5)
+            // Set spawn to FreeMap8 top island plaza facing forward (0.5, 90.0, 0.5, Yaw: 0.0f, Pitch: 0.0f)
             spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
             world.setSpawnLocation(0, 90, 0);
 
@@ -85,11 +89,16 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             // Spawn NPCs after chunks load
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
             
-            // Repeating task to ensure NPCs remain persistent and visible
-            Bukkit.getScheduler().runTaskTimer(this, () -> spawnLobbyNPCs(world), 200L, 200L);
+            // Repeating task to ensure NPCs remain persistent and TAB list stays branded
+            Bukkit.getScheduler().runTaskTimer(this, () -> {
+                spawnLobbyNPCs(world);
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    updatePlayerTablist(p);
+                }
+            }, 200L, 200L);
         }
 
-        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 90.0, 0.5).");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 90.0, 0.5, Yaw: 0.0f).");
     }
 
     private void configureWorld(World world) {
@@ -104,6 +113,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         world.setTime(6000);
         world.setStorm(false);
         world.setThundering(false);
+    }
+
+    private void updatePlayerTablist(Player player) {
+        if (player == null || !player.isOnline()) return;
+        String header = "§6§lTEENFOUNDERS NETWORK\n§f§lBUILD. INNOVATE. SCALE.\n§7teenfounders.in\n";
+        String footer = "\n§7Players Online: §e" + Bukkit.getOnlinePlayers().size() + "  §7|  §6Website: §eteenfounders.in";
+        try {
+            player.sendPlayerListHeaderAndFooter(net.kyori.adventure.text.Component.text(header), net.kyori.adventure.text.Component.text(footer));
+        } catch (Exception ignored) {}
     }
 
     private void purgeMobs(World world) {
@@ -166,16 +184,16 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sy = 90.0;
         double sz = 0.5;
 
-        // 1. Creative Plots Master (X + 4.0)
+        // 1. Creative Plots Master (X + 4.0) - facing West (yaw = 90.0f)
         createNPC(world, new Location(world, sx + 4.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
-        // 2. Survival Event Champion (X - 3.0)
+        // 2. Survival Event Champion (X - 3.0) - facing East (yaw = -90.0f)
         createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
-        // 3. Build Offs Judge (Z + 4.0)
+        // 3. Build Offs Judge (Z + 4.0) - facing North (yaw = 180.0f)
         createNPC(world, new Location(world, sx, sy, sz + 4.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
-        // 4. PvP Gladiator (Z - 3.0)
+        // 4. PvP Gladiator (Z - 3.0) - facing South (yaw = 0.0f)
         createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
@@ -262,6 +280,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         purgePhoenixSoldierBoard(world);
         spawnLobbyNPCs(world);
 
+        teleportToSpawn(player);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 5L);
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 15L);
@@ -269,6 +288,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Bukkit.getScheduler().runTaskLater(this, () -> spawnRandomPet(player), 20L);
 
         setupPlayerLobbyState(player);
+        updatePlayerTablist(player);
 
         player.sendTitle("§6§lTEENFOUNDERS SERVER", "§fWelcome to the Build Network Plaza", 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
@@ -279,7 +299,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Top Island Spawn active at (0.5, 90.0, 0.5).");
         player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
         player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
-        player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
+        player.sendMessage("  §7Website: §eteenfounders.in");
         player.sendMessage("§6§m--------------------------------------------------");
     }
 
@@ -293,7 +313,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     }
 
     private void teleportToSpawn(Player player) {
-        if (spawnLocation != null && player.isOnline()) {
+        if (spawnLocation != null && player != null && player.isOnline()) {
             player.setFallDistance(0.0f);
             player.teleport(spawnLocation);
         }
@@ -362,6 +382,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        String msg = event.getMessage().toLowerCase();
+        if (msg.equals("/leave") || msg.equals("/quit") || msg.equals("/disconnect")) {
+            event.setCancelled(true);
+            event.getPlayer().performCommand("menu leave");
+        }
+    }
+
+    @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof Slime) {
@@ -390,6 +419,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.getInventory().setItem(0, createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Click to open server menu"));
         player.getInventory().setItem(1, createItem(Material.CLOCK, "cosmetics", "§b§lBuilder Tools", "§7Click to open builder tools"));
         player.getInventory().setItem(4, createItem(Material.BOOK, "rules", "§e§lMy Profile", "§7Click to view your profile"));
+        player.getInventory().setItem(7, createItem(Material.REDSTONE, "leave", "§c§lLeave Server", "§7Click to open Leave GUI"));
         player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lNetwork Shop", "§7Click to open shop"));
 
         player.updateInventory();
@@ -482,6 +512,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
                         player.performCommand("menu builder_tools");
                     } else if ("rules".equals(id)) {
                         player.performCommand("menu profile");
+                    } else if ("leave".equals(id)) {
+                        player.performCommand("menu leave");
                     } else if ("profile".equals(id)) {
                         player.performCommand("menu cosmetics");
                     }

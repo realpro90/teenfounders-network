@@ -21,5 +21,7 @@ gui_menus:
     file: gui_menus/help.yml
   rules:
     file: gui_menus/rules.yml
+  leave:
+    file: gui_menus/leave.yml
   championship:
     file: gui_menus/championship.yml

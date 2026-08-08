@@ -1,0 +1,74 @@
+# TeenFounders Network - Leave Confirmation Menu
+menu_title: '§c§lDisconnect / Leave Server'
+open_command:
+- leave
+- disconnect
+- quit
+size: 27
+open_requirement:
+  requirements:
+    permission:
+      type: has permission
+      permission: teenfounders.menu.leave
+      deny_commands: []
+
+items:
+  'filler':
+    material: GRAY_STAINED_GLASS_PANE
+    slots:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 12
+    - 13
+    - 14
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    display_name: ' '
+
+  'confirm_leave':
+    material: RED_CONCRETE
+    slot: 11
+    display_name: '§c§lLEAVE SERVER'
+    lore:
+    - '§7Click to safely disconnect'
+    - '§7from TeenFounders Network.'
+    - ''
+    - '§e► Click to Disconnect'
+    left_click_commands:
+    - '[player] kick %player_name% §c[TeenFounders] You have disconnected from the server.'
+    - '[close]'
+    right_click_commands:
+    - '[player] kick %player_name% §c[TeenFounders] You have disconnected from the server.'
+    - '[close]'
+
+  'cancel_stay':
+    material: LIME_CONCRETE
+    slot: 15
+    display_name: '§a§lSTAY IN LOBBY'
+    lore:
+    - '§7Click to cancel and remain'
+    - '§7in the FreeMap8 Lobby.'
+    - ''
+    - '§e► Click to Return'
+    left_click_commands:
+    - '[close]'
+    right_click_commands:
+    - '[close]'

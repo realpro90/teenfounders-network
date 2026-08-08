@@ -123,7 +123,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        // Bypass Paper client chat signature enforcement by broadcasting server formatted system message
+        // Format chat message and broadcast to bypass Paper unsigned chat signature rejections
         Player player = event.getPlayer();
         String msg = event.getMessage();
         String formatted = "§7[§aMember§7] §f" + player.getDisplayName() + ": §7" + msg;
@@ -205,7 +205,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Villager villagerNPC = null;
         ArmorStand holoNPC = null;
 
-        // Search world entities to find existing Villager & Hologram ArmorStand by custom name
         for (Entity e : world.getEntities()) {
             if (e instanceof Villager v) {
                 if (name.equals(v.getCustomName())) {
@@ -218,7 +217,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             }
         }
 
-        // Configure or Spawn Villager NPC
         if (villagerNPC == null || !villagerNPC.isValid()) {
             villagerNPC = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
             villagerNPC.setCustomName(name);
@@ -236,7 +234,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         villagerNPC.setRemoveWhenFarAway(false);
         villagerNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
 
-        // Configure or Spawn Hologram ArmorStand
         Location holoLoc = loc.clone().add(0, 2.2, 0);
         if (holoNPC == null || !holoNPC.isValid()) {
             holoNPC = (ArmorStand) world.spawnEntity(holoLoc, EntityType.ARMOR_STAND);
@@ -447,7 +444,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
         
-        if (loc.getY() < 40) {
+        // Void fall protection: bring players back instantly if Y < 60.0
+        if (loc.getY() < 60.0) {
             teleportToSpawn(player);
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
         }
@@ -465,15 +463,12 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
-        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            event.setCancelled(true);
-            return;
-        }
-
-        Location loc = event.getEntity().getLocation();
-        if (loc.getZ() < -15 && event.getCause() != EntityDamageEvent.DamageCause.FALL) {
-            event.setCancelled(false);
-            return;
+        if (event.getEntity() instanceof Player player) {
+            if (event.getCause() == EntityDamageEvent.DamageCause.VOID || event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+                event.setCancelled(true);
+                teleportToSpawn(player);
+                return;
+            }
         }
         event.setCancelled(true);
     }
@@ -483,12 +478,6 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Entity entity = event.getEntity();
         if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
             event.setCancelled(true);
-            return;
-        }
-
-        Location loc = entity.getLocation();
-        if (loc.getZ() < -15) {
-            event.setCancelled(false);
             return;
         }
         event.setCancelled(true);

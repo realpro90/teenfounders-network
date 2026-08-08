@@ -1,78 +1,65 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  TeenFounders Build Network — Universal Backend Server Entrypoint          ║
-# ║  Purpur 1.21.4 Engine Launcher with Aikar G1GC Flags                      ║
+# ║  TeenFounders Build Network — Container Entrypoint                           ║
+# ║  PaperMC 1.21.11 · Purpur 1.21.4 Engine · Railway Ephemeral Runtime       ║
 # ║  © 2026 TeenFounders · https://teenfounders.in                            ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ─── Configuration ───────────────────────────────────────────────────────────
-
-DATA_DIR="/data"
-PAPER_VERSION="${PAPER_VERSION:-1.21.4}"
-MEMORY="${JAVA_MEMORY:-5G}"
-PORT="25565"
-SERVER_NAME="${SERVER_NAME:-backend}"
-
-# ─── ANSI Colours ────────────────────────────────────────────────────────────
-
+# ─── Colors ──────────────────────────────────────────────────────────────────
 readonly C_RESET='\033[0m'
 readonly C_BOLD='\033[1m'
 readonly C_ORANGE='\033[38;2;255;153;50m'
 readonly C_GREEN='\033[38;2;80;200;120m'
 readonly C_CYAN='\033[38;2;90;200;250m'
-readonly C_GRAY='\033[38;2;140;140;140m'
+readonly C_YELLOW='\033[38;2;255;204;0m'
 
-# ─── Banner ──────────────────────────────────────────────────────────────────
-
-echo ""
 echo -e "${C_ORANGE}${C_BOLD}"
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║                                                            ║"
-echo "║              TEENFOUNDERS BUILD NETWORK                    ║"
-echo "║          Minecraft Server · Railway Deploy                 ║"
-echo "║                                                            ║"
+echo "║             TEENFOUNDERS BUILD NETWORK CONTAINER             ║"
+echo "║          PaperMC 1.21.11  •  Purpur 1.21.4 Engine            ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo -e "${C_RESET}"
-echo -e "  ${C_GRAY}Server: ${SERVER_NAME} · Engine: Purpur ${PAPER_VERSION} · RAM: ${MEMORY}${C_RESET}"
-echo ""
 
-# ─── Helper: set a property without duplicates ──────────────────────────────
+# ─── Environment Setup ───────────────────────────────────────────────────────
+DATA_DIR="${DATA_DIR:-/data}"
+SERVER_NAME="${SERVER_NAME:-lobby}"
+JAVA_MEMORY="${JAVA_MEMORY:-4G}"
 
-set_property() {
-    local key="$1" value="$2" file="$3"
-    touch "${file}"
-    if grep -q "^${key}=" "${file}" 2>/dev/null; then
-        sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
-    else
-        echo "${key}=${value}" >> "${file}"
-    fi
-}
+mkdir -p "${DATA_DIR}" "${DATA_DIR}/plugins" "${DATA_DIR}/config" "${DATA_DIR}/logs"
 
-# ─── Step 1: Create directories ─────────────────────────────────────────────
+echo -e "  ${C_CYAN}▸${C_RESET} Server Name:  ${C_BOLD}${SERVER_NAME}${C_RESET}"
+echo -e "  ${C_CYAN}▸${C_RESET} Data Dir:     ${DATA_DIR}"
+echo -e "  ${C_CYAN}▸${C_RESET} Java Memory:  ${JAVA_MEMORY}"
 
-mkdir -p "${DATA_DIR}" "${DATA_DIR}/config" "${DATA_DIR}/plugins" "${DATA_DIR}/logs"
-cd "${DATA_DIR}"
-
-echo -e "  ${C_GREEN}✓${C_RESET} Directories initialised"
-
-# ─── Step 2: Accept EULA ────────────────────────────────────────────────────
-
-echo "eula=true" > "${DATA_DIR}/eula.txt"
-echo -e "  ${C_GREEN}✓${C_RESET} EULA accepted"
-
-# ─── Step 3: Sync forwarding secret ─────────────────────────────────────────
-
-if [[ -f "/server/forwarding.secret" ]]; then
-    cp /server/forwarding.secret "${DATA_DIR}/forwarding.secret"
-    echo -e "  ${C_GREEN}✓${C_RESET} Forwarding secret synced"
+# ─── Step 1: Sync BungeeCord / Velocity forwarding & Chat Signatures Config ─
+if [[ -f "/server/paper-global.yml" ]]; then
+    cp -f /server/paper-global.yml "${DATA_DIR}/config/paper-global.yml" 2>/dev/null || true
+    cp -f /server/paper-global.yml "${DATA_DIR}/paper-global.yml" 2>/dev/null || true
+    echo -e "  ${C_GREEN}✓${C_RESET} paper-global.yml synced (enforce-secure-profile: false)"
 fi
 
-# ─── Step 4: Sync repository plugins & configs ──────────────────────────────
+# ─── Step 2: Accept EULA ─────────────────────────────────────────────────────
+echo "eula=true" > "${DATA_DIR}/eula.txt"
+echo -e "  ${C_GREEN}✓${C_RESET} Minecraft EULA accepted"
 
+# ─── Step 3: Verified Shared Plugins Sync ────────────────────────────────────
+if [[ -f "/server/scripts/download-plugins.sh" ]]; then
+    /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
+fi
+
+# ─── Step 4: Force Sync TeenFoundersLobby plugin ─────────────────────────────
 if [[ -d "/server/plugins" ]]; then
     cp -rf /server/plugins/* "${DATA_DIR}/plugins/" 2>/dev/null || true
+    if [[ -f "/server/plugins/TeenFoundersLobby.jar" ]]; then
+        cp -f /server/plugins/TeenFoundersLobby.jar "${DATA_DIR}/plugins/TeenFoundersLobby.jar"
+        echo -e "  ${C_GREEN}✓${C_RESET} TeenFoundersLobby.jar force-synced into plugins!"
+    fi
+    if [[ -f "/server/plugins/FreedomChat.jar" ]]; then
+        cp -f /server/plugins/FreedomChat.jar "${DATA_DIR}/plugins/FreedomChat.jar"
+        echo -e "  ${C_GREEN}✓${C_RESET} FreedomChat.jar force-synced into plugins!"
+    fi
     if [[ -f "/server/plugins/TAB/config.yml" ]]; then
         mkdir -p "${DATA_DIR}/plugins/TAB"
         cp -f /server/plugins/TAB/config.yml "${DATA_DIR}/plugins/TAB/config.yml" 2>/dev/null || true
@@ -80,7 +67,7 @@ if [[ -d "/server/plugins" ]]; then
     if [[ -f "/server/ops.json" ]]; then
         cp -f /server/ops.json "${DATA_DIR}/ops.json" 2>/dev/null || true
     fi
-    echo -e "  ${C_GREEN}✓${C_RESET} Plugin configurations synced & ops.json synced"
+    echo -e "  ${C_GREEN}✓${C_RESET} Custom server plugins & ops.json synced"
 fi
 
 if [[ -d "/server/config_templates" ]]; then
@@ -88,7 +75,6 @@ if [[ -d "/server/config_templates" ]]; then
 fi
 
 # ─── Step 5: Download & Validate Server Engine ──────────────────────────────
-
 JAR_FILE="${DATA_DIR}/purpur-${PAPER_VERSION}.jar"
 NEED_DOWNLOAD=0
 
@@ -120,7 +106,6 @@ else
 fi
 
 # ─── Step 6: Provision Lobby World (lobby server only) ───────────────────────
-
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
     export TF_FORCE_REINSTALL=1
 
@@ -135,114 +120,45 @@ if [[ "${SERVER_NAME}" == "lobby" ]]; then
     fi
 fi
 
-# ─── Step 7: BungeeCord forwarding — spigot.yml ─────────────────────────────
-
-if [[ -f "${DATA_DIR}/spigot.yml" ]]; then
-    if grep -q "bungeecord:" "${DATA_DIR}/spigot.yml"; then
-        sed -i 's/bungeecord:.*/bungeecord: true/' "${DATA_DIR}/spigot.yml"
+# Force server.properties enforce-secure-profile=false
+if [[ -f "${DATA_DIR}/server.properties" ]]; then
+    if grep -q "^enforce-secure-profile=" "${DATA_DIR}/server.properties"; then
+        sed -i 's/^enforce-secure-profile=.*/enforce-secure-profile=false/' "${DATA_DIR}/server.properties"
+    else
+        echo "enforce-secure-profile=false" >> "${DATA_DIR}/server.properties"
     fi
-    set_property "connection-throttle" "-1" "${DATA_DIR}/spigot.yml"
-    set_property "moved-too-quickly-multiplier" "100.0" "${DATA_DIR}/spigot.yml"
-else
-    cat << 'SPIGOT_EOF' > "${DATA_DIR}/spigot.yml"
-config-version: 12
-
-settings:
-  bungeecord: true
-  moved-too-quickly-multiplier: 100.0
-  moved-wrongly-threshold: 100.0
-
-messages:
-  whitelist: "§c[TeenFounders] You are not whitelisted on this builder network."
-  unknown-command: "§c[TeenFounders] Unknown command. Type §e/help §cfor available commands."
-  server-full: "§c[TeenFounders] Server is full! Consider upgrading your rank at https://teenfounders.in."
-  outdated-client: "§c[TeenFounders] Welcome to TeenFounders Network!"
-  outdated-server: "§c[TeenFounders] Welcome to TeenFounders Network!"
-SPIGOT_EOF
-fi
-echo -e "  ${C_GREEN}✓${C_RESET} Spigot configuration initialized"
-
-# ─── Step 8: Paper-global.yml — proxy forwarding mode ───────────────────────
-
-mkdir -p "${DATA_DIR}/config"
-
-if [[ -f "${DATA_DIR}/config/paper-global.yml" ]]; then
-    if grep -q "online-mode:" "${DATA_DIR}/config/paper-global.yml"; then
-        sed -i 's/online-mode:.*/online-mode: false/' "${DATA_DIR}/config/paper-global.yml"
-    fi
-else
-    cat << 'PAPER_EOF' > "${DATA_DIR}/config/paper-global.yml"
-_version: 30
-
-proxies:
-  bungeecord:
-    online-mode: false
-  velocity:
-    enabled: false
-    online-mode: false
-    secret: ""
-
-setting:
-  enforce-secure-profile: false
-PAPER_EOF
-fi
-echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
-
-# ─── Step 9: server.properties — core settings ──────────────────────────────
-
-set_property "online-mode"          "false"     "${DATA_DIR}/server.properties"
-set_property "enforce-secure-profile" "false"   "${DATA_DIR}/server.properties"
-set_property "server-port"          "25565"     "${DATA_DIR}/server.properties"
-set_property "server-ip"            ""          "${DATA_DIR}/server.properties"
-set_property "spawn-protection"     "0"         "${DATA_DIR}/server.properties"
-set_property "level-type"            "flat"      "${DATA_DIR}/server.properties"
-set_property "generate-structures" "false"     "${DATA_DIR}/server.properties"
-set_property "generator-settings"  "{\"layers\":[{\"block\":\"minecraft:bedrock\",\"height\":1},{\"block\":\"minecraft:blackstone\",\"height\":5},{\"block\":\"minecraft:smooth_quartz\",\"height\":1}],\"biome\":\"minecraft:plains\",\"features\":false}" "${DATA_DIR}/server.properties"
-
-echo -e "  ${C_GREEN}✓${C_RESET} server.properties configured"
-
-# ─── Step 10: Download plugins ──────────────────────────────────────────────
-
-if [[ -f "/server/scripts/download-plugins.sh" ]]; then
-    echo ""
-    /bin/bash /server/scripts/download-plugins.sh "${DATA_DIR}/plugins"
-    echo ""
 fi
 
-# ─── Step 11: Launch Server ──────────────────────────────────────────────────
+# ─── Step 7: Launch Paper/Purpur Server Engine ──────────────────────────────
+echo -e "${C_ORANGE}${C_BOLD}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  LAUNCHING MINECRAFT SERVER: ${SERVER_NAME}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo -e "${C_RESET}"
 
-JVM_FLAGS=(
-    # Dual-stack Railway mesh networking & instant DNS resolution
-    "-Dnetworkaddress.cache.ttl=0"
-    "-Dnetworkaddress.cache.negative.ttl=0"
-    # Memory
-    "-Xms${MEMORY}"
-    "-Xmx${MEMORY}"
-    # Aikar's G1GC Flags
-    "-XX:+UseG1GC"
-    "-XX:+ParallelRefProcEnabled"
-    "-XX:MaxGCPauseMillis=200"
-    "-XX:+UnlockExperimentalVMOptions"
-    "-XX:+DisableExplicitGC"
-    "-XX:+AlwaysPreTouch"
-    "-XX:G1NewSizePercent=30"
-    "-XX:G1MaxNewSizePercent=40"
-    "-XX:G1HeapRegionSize=8M"
-    "-XX:G1ReservePercent=20"
-    "-XX:G1HeapWastePercent=5"
-    "-XX:G1MixedGCCountTarget=4"
-    "-XX:InitiatingHeapOccupancyPercent=15"
-    "-XX:G1MixedGCLiveThresholdPercent=90"
-    "-XX:G1RSetUpdatingPauseTimePercent=5"
-    "-XX:SurvivorRatio=32"
-    "-XX:+PerfDisableSharedMem"
-    "-XX:MaxTenuringThreshold=1"
-    "-Dusing.aikars.flags=https://mcflags.emc.gs"
-)
+cd "${DATA_DIR}"
 
-echo -e "${C_ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
-echo -e "  ${C_GREEN}${C_BOLD}▶ Launching Purpur ${PAPER_VERSION} on :${PORT} with ${MEMORY} RAM${C_RESET}"
-echo -e "${C_ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
-echo ""
-
-exec java "${JVM_FLAGS[@]}" -jar "${JAR_FILE}" nogui
+exec java \
+    -Xms"${JAVA_MEMORY}" \
+    -Xmx"${JAVA_MEMORY}" \
+    -XX:+UseG1GC \
+    -XX:+ParallelRefProcEnabled \
+    -XX:MaxGCPauseMillis=200 \
+    -XX:+UnlockExperimentalVMOptions \
+    -XX:+DisableExplicitGC \
+    -XX:+AlwaysPreTouch \
+    -XX:G1NewSizePercent=30 \
+    -XX:G1MaxNewSizePercent=40 \
+    -XX:G1HeapRegionSize=8M \
+    -XX:G1ReservePercent=20 \
+    -XX:G1HeapWastePercent=5 \
+    -XX:G1MixedGCCountTarget=4 \
+    -XX:InitiatingHeapOccupancyPercent=15 \
+    -XX:G1MixedGCLiveThresholdPercent=90 \
+    -XX:G1RSetUpdatingPauseTimePercent=5 \
+    -XX:SurviorRatio=32 \
+    -XX:+PerfDisableSharedMem \
+    -XX:MaxTenuringThreshold=1 \
+    -Dusing.aikars.flags=https://mcflags.emc.gs \
+    -Daikars.new.flags=true \
+    -jar "${JAR_FILE}" --nogui

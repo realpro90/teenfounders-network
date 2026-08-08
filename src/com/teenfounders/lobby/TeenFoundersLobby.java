@@ -8,6 +8,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
@@ -41,6 +43,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +58,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     private NamespacedKey npcKey;
     private NamespacedKey petKey;
     private final Map<UUID, Entity> playerPets = new HashMap<>();
+    private final Map<UUID, Long> clickCooldowns = new HashMap<>();
     private final Random random = new Random();
 
     @Override
@@ -61,6 +66,9 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         itemKey = new NamespacedKey(this, "lobby_item");
         npcKey = new NamespacedKey(this, "lobby_npc");
         petKey = new NamespacedKey(this, "lobby_pet");
+        
+        // Register BungeeCord messaging channel for proxy server switching
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getPluginManager().registerEvents(this, this);
 
         World world = Bukkit.getWorlds().get(0);
@@ -71,8 +79,14 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
             world.setSpawnLocation(0, 90, 0);
 
+            // Clean PhoenixSoldier board signs from map
+            purgePhoenixSoldierBoard(world);
+
             // Spawn NPCs after chunks load
             Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
+            
+            // Repeating task to ensure NPCs remain persistent and visible
+            Bukkit.getScheduler().runTaskTimer(this, () -> spawnLobbyNPCs(world), 200L, 200L);
         }
 
         getLogger().info("TeenFoundersLobby v6.0 enabled! FreeMap8 World active at (0.5, 90.0, 0.5).");
@@ -98,7 +112,49 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
                 entity.remove();
             } else if (entity instanceof Mob) {
                 if (!entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING)) {
-                    entity.remove();
+                    String customName = entity.getCustomName();
+                    if (customName == null || (!customName.contains("BUILD MASTER") && !customName.contains("SURVIVAL CHAMPION") && !customName.contains("BUILD OFFS JUDGE") && !customName.contains("PVP GLADIATOR"))) {
+                        entity.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    public void purgePhoenixSoldierBoard(World world) {
+        if (world == null) return;
+        int minX = -60, maxX = 60;
+        int minY = 40, maxY = 120;
+        int minZ = -60, maxZ = 60;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    if (block.getState() instanceof Sign sign) {
+                        boolean match = false;
+                        for (String line : sign.getSide(org.bukkit.block.sign.Side.FRONT).getLines()) {
+                            String lower = line.toLowerCase();
+                            if (lower.contains("phoenix") || lower.contains("soldier") || lower.contains("build by") || lower.contains("srphoenix")) {
+                                match = true;
+                                break;
+                            }
+                        }
+                        if (match) {
+                            block.setType(Material.AIR);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Purge text displays or armor stands with credit text
+        for (Entity e : world.getEntities()) {
+            String name = e.getCustomName();
+            if (name != null) {
+                String lower = name.toLowerCase();
+                if (lower.contains("phoenix") || lower.contains("soldier") || lower.contains("build by") || lower.contains("srphoenix")) {
+                    e.remove();
                 }
             }
         }
@@ -110,31 +166,31 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sy = 90.0;
         double sz = 0.5;
 
-        // 1. Creative Plots Master (X + 3.5)
-        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
+        // 1. Creative Plots Master (X + 4.0)
+        createNPC(world, new Location(world, sx + 4.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
-        // 2. Survival Event Champion (X - 3.5)
-        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
+        // 2. Survival Event Champion (X - 3.0)
+        createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
-        // 3. Build Offs Judge (Z + 3.5)
-        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
+        // 3. Build Offs Judge (Z + 4.0)
+        createNPC(world, new Location(world, sx, sy, sz + 4.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
-        // 4. PvP Gladiator (Z - 3.5)
-        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
+        // 4. PvP Gladiator (Z - 3.0)
+        createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
         loc.getChunk().load(true);
-        boolean exists = false;
+        boolean villagerExists = false;
 
         for (Entity e : world.getNearbyEntities(loc, 1.5, 2.5, 1.5)) {
             if (e instanceof Villager && name.equals(e.getCustomName())) {
-                exists = true;
+                villagerExists = true;
                 break;
             }
         }
 
-        if (!exists) {
+        if (!villagerExists) {
             Villager npc = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
             npc.setCustomName(name);
             npc.setCustomNameVisible(true);
@@ -144,6 +200,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             npc.setInvulnerable(true);
             npc.setSilent(true);
             npc.setCollidable(false);
+            npc.setPersistent(true);
+            npc.setRemoveWhenFarAway(false);
             npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
 
             Location holoLoc = loc.clone().add(0, 2.2, 0);
@@ -154,6 +212,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             holo.setCanPickupItems(false);
             holo.setVisible(false);
             holo.setMarker(true);
+            holo.setPersistent(true);
             holo.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
         }
     }
@@ -200,6 +259,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         World world = player.getWorld();
         purgeMobs(world);
+        purgePhoenixSoldierBoard(world);
         spawnLobbyNPCs(world);
 
         Bukkit.getScheduler().runTaskLater(this, () -> teleportToSpawn(player), 1L);
@@ -210,13 +270,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         setupPlayerLobbyState(player);
 
-        player.sendTitle("§6§lFREEBUILD LOBBY", "§fWelcome to FreeBuild2 Network Plaza", 10, 70, 20);
+        player.sendTitle("§6§lTEENFOUNDERS SERVER", "§fWelcome to the Build Network Plaza", 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.5f);
 
         player.sendMessage("§6§m--------------------------------------------------");
-        player.sendMessage("  §6§lTEENFOUNDERS FREEBUILD NETWORK");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! FreeBuild2 World active at (0.5, 66.0, 17.5).");
+        player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Top Island Spawn active at (0.5, 90.0, 0.5).");
         player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
         player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
         player.sendMessage("  §7Website: §eyouthfounders.in / teenfounders.in");
@@ -229,6 +289,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (pet != null && pet.isValid()) {
             pet.remove();
         }
+        clickCooldowns.remove(event.getPlayer().getUniqueId());
     }
 
     private void teleportToSpawn(Player player) {
@@ -238,17 +299,64 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    private boolean isClickCooldown(Player player) {
+        long now = System.currentTimeMillis();
+        long last = clickCooldowns.getOrDefault(player.getUniqueId(), 0L);
+        if (now - last < 500) {
+            return true;
+        }
+        clickCooldowns.put(player.getUniqueId(), now);
+        return false;
+    }
+
+    private void handleNPCInteraction(Player player, Entity entity) {
+        if (isClickCooldown(player)) return;
+
+        String target = null;
+        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+            target = entity.getPersistentDataContainer().get(npcKey, PersistentDataType.STRING);
+        }
+        if (target == null && entity.getCustomName() != null) {
+            String name = entity.getCustomName();
+            if (name.contains("BUILD MASTER")) target = "creative";
+            else if (name.contains("SURVIVAL CHAMPION")) target = "survival-event";
+            else if (name.contains("BUILD OFFS JUDGE")) target = "competition";
+            else if (name.contains("PVP GLADIATOR")) target = "pvp";
+        }
+
+        if (target != null && !target.startsWith("holo_")) {
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+            player.sendTitle("§6§lCONNECTING...", "§fSwitching to " + target.toUpperCase() + " server", 5, 40, 10);
+            
+            // Send BungeeCord plugin message to connect player to target server
+            try {
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(b);
+                out.writeUTF("Connect");
+                out.writeUTF(target);
+                player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
+            } catch (Exception e) {
+                player.performCommand("server " + target);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onNPCInteract(PlayerInteractEntityEvent event) {
         Entity entity = event.getRightClicked();
-        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
-            String target = entity.getPersistentDataContainer().get(npcKey, PersistentDataType.STRING);
-            if (target != null && !target.startsWith("holo_")) {
-                Player player = event.getPlayer();
-                player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
-                player.sendTitle("§6§lCONNECTING...", "§fSwitching to " + target.toUpperCase() + " server", 5, 40, 10);
-                player.performCommand("server " + target);
-                event.setCancelled(true);
+        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) || (entity.getCustomName() != null && (entity.getCustomName().contains("BUILD MASTER") || entity.getCustomName().contains("SURVIVAL CHAMPION") || entity.getCustomName().contains("BUILD OFFS JUDGE") || entity.getCustomName().contains("PVP GLADIATOR")))) {
+            event.setCancelled(true);
+            handleNPCInteraction(event.getPlayer(), entity);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onNPCDamage(EntityDamageByEntityEvent event) {
+        Entity entity = event.getEntity();
+        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) || (entity.getCustomName() != null && (entity.getCustomName().contains("BUILD MASTER") || entity.getCustomName().contains("SURVIVAL CHAMPION") || entity.getCustomName().contains("BUILD OFFS JUDGE") || entity.getCustomName().contains("PVP GLADIATOR")))) {
+            event.setCancelled(true);
+            if (event.getDamager() instanceof Player player) {
+                handleNPCInteraction(player, entity);
             }
         }
     }
@@ -256,7 +364,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof Slime || (entity instanceof Mob && !entity.hasMetadata("NPC") && !entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING) && !entity.getPersistentDataContainer().has(petKey, PersistentDataType.STRING))) {
+        if (entity instanceof Slime) {
             event.setCancelled(true);
         }
     }
@@ -279,10 +387,10 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
 
-        player.getInventory().setItem(0, createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Right-click to open server menu"));
-        player.getInventory().setItem(1, createItem(Material.CLOCK, "cosmetics", "§b§lCosmetics", "§7Right-click to open cosmetics"));
-        player.getInventory().setItem(4, createItem(Material.BOOK, "rules", "§e§lRules & Info", "§7Right-click to read network rules"));
-        player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lMy Profile", "§7Right-click to view your profile"));
+        player.getInventory().setItem(0, createItem(Material.COMPASS, "nav", "§6§lServer Navigator", "§7Click to open server menu"));
+        player.getInventory().setItem(1, createItem(Material.CLOCK, "cosmetics", "§b§lBuilder Tools", "§7Click to open builder tools"));
+        player.getInventory().setItem(4, createItem(Material.BOOK, "rules", "§e§lMy Profile", "§7Click to view your profile"));
+        player.getInventory().setItem(8, createItem(Material.EMERALD, "profile", "§a§lNetwork Shop", "§7Click to open shop"));
 
         player.updateInventory();
     }
@@ -311,8 +419,14 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(EntityDamageEvent event) {
+        // Complete fall damage negation anywhere in lobby
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            event.setCancelled(true);
+            return;
+        }
+
         Location loc = event.getEntity().getLocation();
-        if (loc.getZ() < 0) {
+        if (loc.getZ() < 0 && event.getCause() != EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(false);
             return;
         }
@@ -321,7 +435,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPvP(EntityDamageByEntityEvent event) {
-        Location loc = event.getEntity().getLocation();
+        Entity entity = event.getEntity();
+        if (entity.getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Location loc = entity.getLocation();
         if (loc.getZ() < 0) {
             event.setCancelled(false);
             return;
@@ -340,7 +460,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
@@ -349,23 +469,32 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.getPersistentDataContainer().has(itemKey, PersistentDataType.STRING)) {
                 String id = meta.getPersistentDataContainer().get(itemKey, PersistentDataType.STRING);
-                if ("nav".equals(id) || "cosmetics".equals(id) || "profile".equals(id)) {
-                    player.performCommand("menu");
+                
+                // Left click and Right click support for all hotbar tools
+                if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     event.setCancelled(true);
-                    return;
-                } else if ("rules".equals(id)) {
-                    player.performCommand("help");
-                    event.setCancelled(true);
+                    if (isClickCooldown(player)) return;
+
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
+                    if ("nav".equals(id)) {
+                        player.performCommand("menu server_selector");
+                    } else if ("cosmetics".equals(id)) {
+                        player.performCommand("menu builder_tools");
+                    } else if ("rules".equals(id)) {
+                        player.performCommand("menu profile");
+                    } else if ("profile".equals(id)) {
+                        player.performCommand("menu cosmetics");
+                    }
                     return;
                 }
             }
         }
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            org.bukkit.block.Block b = event.getClickedBlock();
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            Block b = event.getClickedBlock();
             if (b != null && !player.isOp()) {
                 Material m = b.getType();
-                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER") || m.name().contains("CHEST")) {
+                if (m.name().contains("DOOR") || m.name().contains("BUTTON") || m.name().contains("LEVER") || m.name().contains("CHEST") || m.name().contains("ANVIL") || m.name().contains("FURNACE")) {
                     event.setCancelled(true);
                 }
             }

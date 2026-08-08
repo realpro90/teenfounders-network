@@ -125,16 +125,36 @@ if [[ -d "/server/plugins" ]]; then
     echo -e "  ${C_GREEN}✓${C_RESET} Repository plugins forced into ${DATA_DIR}/plugins/"
 fi
 
+# Patch FreedomChat api-version to 1.20 if needed
+python3 -c "
+import zipfile, os
+for jar in ['${DATA_DIR}/plugins/FreedomChat.jar', '/server/plugins/FreedomChat.jar']:
+    if os.path.exists(jar):
+        tmp = jar + '.tmp'
+        try:
+            with zipfile.ZipFile(jar, 'r') as zin:
+                with zipfile.ZipFile(tmp, 'w') as zout:
+                    for item in zin.infolist():
+                        content = zin.read(item.filename)
+                        if item.filename == 'plugin.yml':
+                            text = content.decode('utf-8')
+                            text = text.replace('api-version: \"26.2\"', 'api-version: \"1.20\"').replace('api-version: 26.2', 'api-version: \"1.20\"')
+                            content = text.encode('utf-8')
+                        zout.writestr(item, content)
+            os.replace(tmp, jar)
+        except Exception:
+            pass
+" 2>/dev/null || true
+
 # Compile fresh TeenFoundersLobby plugin if source is available
 if [[ -f "/server/src/com/teenfounders/lobby/TeenFoundersLobby.java" ]]; then
     echo -e "  ${C_CYAN}▸${C_RESET} Compiling fresh TeenFoundersLobby.jar..."
     mkdir -p /tmp/tf_lobby_build
     cp_jars=$(find "${DATA_DIR}/plugins" -name "*.jar" | tr '\n' ':')
-    if javac -cp "${cp_jars}" -d /tmp/tf_lobby_build /server/src/com/teenfounders/lobby/TeenFoundersLobby.java 2>/dev/null; then
-        cp /server/src/plugin.yml /tmp/tf_lobby_build/plugin.yml 2>/dev/null || true
-        jar -cf "${DATA_DIR}/plugins/TeenFoundersLobby.jar" -C /tmp/tf_lobby_build . 2>/dev/null || true
-        echo -e "  ${C_GREEN}✓${C_RESET} TeenFoundersLobby.jar freshly compiled & installed!"
-    fi
+    javac -cp "${cp_jars}" -d /tmp/tf_lobby_build /server/src/com/teenfounders/lobby/TeenFoundersLobby.java || true
+    cp /server/src/plugin.yml /tmp/tf_lobby_build/plugin.yml || true
+    jar -cf "${DATA_DIR}/plugins/TeenFoundersLobby.jar" -C /tmp/tf_lobby_build . || true
+    echo -e "  ${C_GREEN}✓${C_RESET} TeenFoundersLobby.jar freshly compiled & installed!"
 fi
 
 if [[ -d "/server/config_templates" ]]; then

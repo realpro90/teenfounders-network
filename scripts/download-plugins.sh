@@ -69,6 +69,8 @@ download_plugin "GSit" "https://cdn.modrinth.com/data/GOHbQGyX/versions/nZM8fxpG
 download_plugin "spark" "https://cdn.modrinth.com/data/l6YH9Als/versions/pY6vjC8N/spark-1.10.119-bukkit.jar" 2000000
 download_plugin "LPC" "https://github.com/mrfreespaces/LPC/releases/download/v1.3.1/LPC-1.3.1.jar" 15000
 
+download_plugin "FreedomChat" "https://cdn.modrinth.com/data/MubyTbnA/versions/Pqu2VLTB/FreedomChat-Paper-1.7.9.jar" 10000
+
 echo "======================================================================"
-echo "[TF-SETUP] Verified plugin check complete! (19 production plugins)"
+echo "[TF-SETUP] Verified plugin check complete! (20 production plugins)"
 echo "======================================================================"

@@ -180,6 +180,9 @@ proxies:
     enabled: false
     online-mode: false
     secret: ""
+
+setting:
+  enforce-secure-profile: false
 PAPER_EOF
 fi
 echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
@@ -187,6 +190,7 @@ echo -e "  ${C_GREEN}✓${C_RESET} Paper proxy forwarding configured"
 # ─── Step 9: server.properties — core settings ──────────────────────────────
 
 set_property "online-mode"          "false"     "${DATA_DIR}/server.properties"
+set_property "enforce-secure-profile" "false"   "${DATA_DIR}/server.properties"
 set_property "server-port"          "25565"     "${DATA_DIR}/server.properties"
 set_property "server-ip"            ""          "${DATA_DIR}/server.properties"
 set_property "spawn-protection"     "0"         "${DATA_DIR}/server.properties"

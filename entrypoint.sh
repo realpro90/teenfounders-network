@@ -87,16 +87,16 @@ fi
 
 # ─── Step 5: Provision Lobby World (lobby server only) ───────────────────────
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
-    export TF_FORCE_REINSTALL=1
-
-    if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
-        echo ""
-        /bin/bash /server/lobby/setup_lobby_world.sh "${DATA_DIR}"
-        echo ""
-    elif [[ -f "/server/common/setup_lobby_world.sh" ]]; then
-        echo ""
-        /bin/bash /server/common/setup_lobby_world.sh "${DATA_DIR}"
-        echo ""
+    if [[ ! -f "${DATA_DIR}/world/level.dat" ]]; then
+        if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
+            echo ""
+            /bin/bash /server/lobby/setup_lobby_world.sh "${DATA_DIR}"
+            echo ""
+        elif [[ -f "/server/common/setup_lobby_world.sh" ]]; then
+            echo ""
+            /bin/bash /server/common/setup_lobby_world.sh "${DATA_DIR}"
+            echo ""
+        fi
     fi
 fi
 

@@ -617,19 +617,16 @@ _install_lobby() {
     _section "Backup"
     _backup_world
 
-    # ── Step 2: Download lobby archive ───────────────────────────────────
-    _section "Downloading TeenFounders Lobby…"
-
-    local download_ok=false
-
-    if _download "${LOBBY_URL}" "${archive_path}" "TeenFounders Lobby World"; then
-        # Verify checksum if provided
-        if _verify_sha256 "${archive_path}" "${EXPECTED_SHA256}"; then
-            download_ok=true
-        else
-            _warn "Checksum verification failed — discarding archive"
-            rm -f "${archive_path}"
-        fi
+    # ── Step 2: Extract pre-packaged local world archive ─────────────────
+    local user_tar="/server/lobby/lobbyworld.tar.gz"
+    if [[ -f "${user_tar}" ]]; then
+        _info "Found pre-packaged lobbyworld archive: ${user_tar}"
+        rm -rf "${WORLD_DIR}"
+        mkdir -p "${WORLD_DIR}"
+        tar -xzf "${user_tar}" --strip-components=1 -C "${WORLD_DIR}" 2>/dev/null || tar -xzf "${user_tar}" -C "${WORLD_DIR}" 2>/dev/null || true
+        INSTALL_METHOD="user_lobbyworld_tar"
+        _ok "Extracted local lobbyworld archive into ${WORLD_DIR}"
+        return 0
     fi
 
     # ── Step 3: Wipe old world & prepare directories ─────────────────────

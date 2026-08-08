@@ -1,6 +1,6 @@
 # ==============================================================================
 # TeenFounders Network - PaperMC Global Configuration Template
-# Enables BungeeCord IP & Profile Forwarding for proxy connectivity
+# Enables BungeeCord IP & Profile Forwarding and disables Chat Signatures
 # ==============================================================================
 
 _version: 30
@@ -13,16 +13,19 @@ proxies:
     online-mode: false
     secret: ""
 
+setting:
+  enforce-secure-profile: false
+
+unsupported-settings:
+  allow-piston-duplication: false
+  perform-username-validation: false
+
 messages:
   kick:
     authentication-servers-down: "§c[TeenFounders] Authentication servers are down. Please try again later."
     connection-throttle: "§c[TeenFounders] Connection throttled. Please wait a moment."
     flying-player: "§c[TeenFounders] Flying is not enabled on this server."
     flying-vehicle: "§c[TeenFounders] Flying is not enabled on this server."
-
-unsupported-settings:
-  allow-piston-duplication: false
-  perform-username-validation: false
 
 chunk-loading:
   min-load-radius: 2

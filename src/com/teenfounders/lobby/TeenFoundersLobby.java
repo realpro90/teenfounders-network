@@ -77,15 +77,15 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         if (world != null) {
             configureWorld(world);
             
-            // Reference spawn location from player screenshot: X: -1.8, Y: 90.0, Z: -4.5
-            spawnLocation = new Location(world, -1.8, 90.0, -4.5, 0.0f, 0.0f);
-            world.setSpawnLocation(-1, 90, -4);
+            // Centered Plaza Spawn Location: X: 0.5, Y: 90.0, Z: 0.5, Yaw: 0.0f
+            spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
+            world.setSpawnLocation(0, 90, 0);
 
             // Clean PhoenixSoldier board signs from map
             purgePhoenixSoldierBoard(world);
 
-            // Initial NPC spawn
-            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 30L);
+            // Initial NPC spawn after chunks force loaded
+            Bukkit.getScheduler().runTaskLater(this, () -> spawnLobbyNPCs(world), 20L);
             
             // Repeating task to keep NPCs visible, persistent, and TAB list branded
             Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -93,10 +93,10 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     updatePlayerTablist(p);
                 }
-            }, 200L, 200L);
+            }, 100L, 100L);
         }
 
-        getLogger().info("TeenFoundersLobby v6.0 enabled! Spawn active at (-1.8, 90.0, -4.5).");
+        getLogger().info("TeenFoundersLobby v6.0 enabled! Plaza Spawn active at (0.5, 90.0, 0.5).");
     }
 
     private void configureWorld(World world) {
@@ -124,7 +124,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        // Bypass chat signature enforcement by broadcasting server formatted system message
+        // Bypass Paper client chat signature enforcement by broadcasting server formatted system message
         Player player = event.getPlayer();
         String msg = event.getMessage();
         String formatted = "§7[§aMember§7] §f" + player.getDisplayName() + ": §7" + msg;
@@ -187,29 +187,30 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
     public void spawnLobbyNPCs(World world) {
         if (world == null) return;
-        // Reference coordinates from player screenshot: X: -1.8, Y: 90.0, Z: -4.5
-        double sx = -1.8;
+        // Centered Plaza coordinates: X: 0.5, Y: 90.0, Z: 0.5
+        double sx = 0.5;
         double sy = 90.0;
-        double sz = -4.5;
+        double sz = 0.5;
 
-        // 1. Creative Plots Master (X + 3.0 = 1.2, Z = -4.5) - facing West (yaw = 90.0f)
-        createNPC(world, new Location(world, sx + 3.0, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
+        // 1. Creative Plots Master (X + 3.5 = 4.0, Z = 0.5) - facing West (yaw = 90.0f)
+        createNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
 
-        // 2. Survival Event Champion (X - 3.0 = -4.8, Z = -4.5) - facing East (yaw = -90.0f)
-        createNPC(world, new Location(world, sx - 3.0, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
+        // 2. Survival Event Champion (X - 3.5 = -3.0, Z = 0.5) - facing East (yaw = -90.0f)
+        createNPC(world, new Location(world, sx - 3.5, sy, sz, -90.0f, 0.0f), "survival-event", "§c§lSURVIVAL CHAMPION", "§f15-Day Survival · Explore & survive!");
 
-        // 3. Build Offs Judge (Z + 3.0 = -1.5, X = -1.8) - facing North (yaw = 180.0f)
-        createNPC(world, new Location(world, sx, sy, sz + 3.0, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
+        // 3. Build Offs Judge (Z + 3.5 = 4.0, X = 0.5) - facing North (yaw = 180.0f)
+        createNPC(world, new Location(world, sx, sy, sz + 3.5, 180.0f, 0.0f), "competition", "§b§lBUILD OFFS JUDGE", "§fBuild Competition · Compete & win!");
 
-        // 4. PvP Gladiator (Z - 3.0 = -7.5, X = -1.8) - facing South (yaw = 0.0f)
-        createNPC(world, new Location(world, sx, sy, sz - 3.0, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
+        // 4. PvP Gladiator (Z - 3.5 = -3.0, X = 0.5) - facing South (yaw = 0.0f)
+        createNPC(world, new Location(world, sx, sy, sz - 3.5, 0.0f, 0.0f), "pvp", "§e§lPVP GLADIATOR", "§fPvP Arena · Battle other players!");
     }
 
     private void createNPC(World world, Location loc, String serverTarget, String name, String subtitle) {
         loc.getChunk().load(true);
+        loc.getChunk().setForceLoaded(true);
         boolean villagerExists = false;
 
-        for (Entity e : world.getNearbyEntities(loc, 1.5, 2.5, 1.5)) {
+        for (Entity e : world.getNearbyEntities(loc, 2.0, 3.0, 2.0)) {
             if (e instanceof Villager && name.equals(e.getCustomName())) {
                 villagerExists = true;
                 break;
@@ -304,7 +305,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
 
         player.sendMessage("§6§m--------------------------------------------------");
         player.sendMessage("  §6§lTEENFOUNDERS BUILD NETWORK");
-        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Spawn active at (-1.8, 90.0, -4.5).");
+        player.sendMessage("  §fWelcome, §e" + player.getName() + "§f! Spawn active at (0.5, 90.0, 0.5).");
         player.sendMessage("  §a• Build Master §7[Creative]  §c• Survival Champion §7[Survival]");
         player.sendMessage("  §b• Build Offs Judge §7[Competition]  §e• Gladiator §7[PvP Arena]");
         player.sendMessage("  §7Website: §eteenfounders.in");

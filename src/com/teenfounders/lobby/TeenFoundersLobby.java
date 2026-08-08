@@ -122,13 +122,23 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        // Format chat message and broadcast to bypass Paper unsigned chat signature rejections
+    public void onPaperChat(io.papermc.paper.event.player.AsyncChatEvent event) {
+        Player player = event.getPlayer();
+        String messageText = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(event.message());
+        String formatted = "§7[§aMember§7] §f" + player.getName() + "§7: §f" + messageText;
+        
+        event.setCancelled(true);
+        Bukkit.getScheduler().runTask(this, () -> Bukkit.broadcastMessage(formatted));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLegacyChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         String msg = event.getMessage();
-        String formatted = "§7[§aMember§7] §f" + player.getDisplayName() + ": §7" + msg;
-        Bukkit.broadcastMessage(formatted);
+        String formatted = "§7[§aMember§7] §f" + player.getName() + "§7: §f" + msg;
+        
         event.setCancelled(true);
+        Bukkit.getScheduler().runTask(this, () -> Bukkit.broadcastMessage(formatted));
     }
 
     private void purgeMobs(World world) {
@@ -221,33 +231,33 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             npc = world.spawn(loc, Villager.class);
             npc.setCustomName(name);
             npc.setCustomNameVisible(true);
+            npc.setAI(false);
+            npc.setInvulnerable(true);
+            npc.setCollidable(false);
+            npc.setSilent(true);
+            npc.setPersistent(true);
+            npc.setRemoveWhenFarAway(false);
+            npc.setProfession(Villager.Profession.LIBRARIAN);
+            npc.setVillagerType(Villager.Type.PLAINS);
+            npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
+        } else {
+            npc.teleport(loc);
         }
-        
-        npc.teleport(loc);
-        npc.setProfession(Villager.Profession.LIBRARIAN);
-        npc.setVillagerType(Villager.Type.PLAINS);
-        npc.setAI(false);
-        npc.setInvulnerable(true);
-        npc.setSilent(true);
-        npc.setCollidable(false);
-        npc.setPersistent(true);
-        npc.setRemoveWhenFarAway(false);
-        npc.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, serverTarget);
 
         Location holoLoc = loc.clone().add(0, 2.2, 0);
         if (holoNPC == null || !holoNPC.isValid()) {
             holoNPC = world.spawn(holoLoc, ArmorStand.class);
             holoNPC.setCustomName(subtitle);
             holoNPC.setCustomNameVisible(true);
+            holoNPC.setGravity(false);
+            holoNPC.setCanPickupItems(false);
+            holoNPC.setVisible(false);
+            holoNPC.setMarker(true);
+            holoNPC.setPersistent(true);
+            holoNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
+        } else {
+            holoNPC.teleport(holoLoc);
         }
-
-        holoNPC.teleport(holoLoc);
-        holoNPC.setGravity(false);
-        holoNPC.setCanPickupItems(false);
-        holoNPC.setVisible(false);
-        holoNPC.setMarker(true);
-        holoNPC.setPersistent(true);
-        holoNPC.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, "holo_" + serverTarget);
     }
 
     private void spawnRandomPet(Player player) {

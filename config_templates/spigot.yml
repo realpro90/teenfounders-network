@@ -41,7 +41,7 @@ world-settings:
       water: 8
       villagers: 16
       flying-monsters: 24
-      tick-inactive-villagers: false
+      tick-inactive-villagers: true
       ignore-spectators: true
     entity-tracking-range:
       players: 128

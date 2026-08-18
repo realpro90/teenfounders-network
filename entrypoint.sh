@@ -106,6 +106,12 @@ fi
 
 # ─── Step 5: Provision Lobby World (lobby server only) ───────────────────────
 if [[ "${SERVER_NAME}" == "lobby" ]]; then
+    # Purge playerdata, stats, advancements, Essentials userdata so players always spawn at Plaza center (0.5, 90.0, 0.5)
+    rm -rf "${DATA_DIR}/world/playerdata"
+    rm -rf "${DATA_DIR}/world/stats"
+    rm -rf "${DATA_DIR}/world/advancements"
+    rm -rf "${DATA_DIR}/plugins/Essentials/userdata"
+
     if [[ ! -f "${DATA_DIR}/world/level.dat" ]]; then
         if [[ -f "/server/lobby/setup_lobby_world.sh" ]]; then
             echo ""

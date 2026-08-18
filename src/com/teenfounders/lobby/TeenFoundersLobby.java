@@ -39,6 +39,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -78,7 +79,7 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
             
             // Centered Plaza Spawn Location: X: 0.5, Y: 90.0, Z: 0.5, Yaw: 0.0f
             spawnLocation = new Location(world, 0.5, 90.0, 0.5, 0.0f, 0.0f);
-            world.setSpawnLocation(0, 90, 0);
+            world.setSpawnLocation(spawnLocation);
 
             // Clean signs and player heads from lobby map
             purgeSignsAndSkulls(world);
@@ -119,6 +120,13 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         try {
             player.sendPlayerListHeaderAndFooter(net.kyori.adventure.text.Component.text(header), net.kyori.adventure.text.Component.text(footer));
         } catch (Exception ignored) {}
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerSpawnLocation(PlayerSpawnLocationEvent event) {
+        if (spawnLocation != null) {
+            event.setSpawnLocation(spawnLocation);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -194,6 +202,8 @@ public class TeenFoundersLobby extends JavaPlugin implements Listener {
         double sx = 0.5;
         double sy = 90.0;
         double sz = 0.5;
+
+        world.getChunkAt(0, 0).setForceLoaded(true);
 
         // 1. Creative Plots Master (X + 3.5 = 4.0, Z = 0.5) - facing West (yaw = 90.0f)
         createOrUpdateNPC(world, new Location(world, sx + 3.5, sy, sz, 90.0f, 0.0f), "creative", "§a§lBUILD MASTER", "§fCreative Plots · Build your dream plot!");
